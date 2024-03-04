@@ -26,7 +26,7 @@ spec:
         image: quay.io/keycloak/keycloak:latest
         args:
           - start
-          - --hostname-strict=false
+          - --hostname=https://keycloak-enexse-u12566.vm.elestio.app/
         ports:
         - containerPort: 8080 # The port that the container is running on in the cluster
         env:

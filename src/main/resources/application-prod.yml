@@ -1,0 +1,32 @@
+spring:
+  data:
+    mongodb:
+      database: ees-ms-users
+      port: 27017
+      host: mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_ADDRESS}
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    hostname: "${HOSTNAME}.eureka"
+#Keycloack
+keycloak:
+  realm: ${KEYCLOAK_REALM} #ees-ms-authentification
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL} #https://keycloak-enexse-u12566.vm.elestio.app/
+  resource: ${KEYCLOAK_RESOURCE} #ees-ms-keycloak
+  credentials:
+    secret: ${KEYCLOAK_CREDENTIALS_SECRET} #JbkQ9O7KpRc0HOUVJNOw5TY8dJQT4W4V
+  use-resource-role-mappings: false
+  bearer-only: true
+  ssl-required: none
+#Cloudinary Stockage Cloud
+cloudinary:
+  cloud-name: dq5xn9izs
+  api-key: 135195339797177
+  secret-key: H6fAcSZs1RQgPPQDqgsAeJ8H6dk
+application:
+  url: https://groovy-pager-265618.uc.r.appspot.com/

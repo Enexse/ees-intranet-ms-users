@@ -14,7 +14,6 @@
     <name>ees-ms-users</name>
     <description>Enexse Intranet Users Microservice</description>
     <properties>
-        <java.version>15</java.version>
         <springdoc.version>2.0.2</springdoc.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <keycloak.version>18.0.1</keycloak.version>

@@ -15,11 +15,50 @@ spec:
         app: ees-ms-users-app
     spec:
       containers:
-        - name: ees-ms-users-app
-          image: enexse/ees-ms-users-app:latest # Image that will be used to containers in the cluster
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 9190 # The port that the container is running on in the cluster
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017 # The port that the container is running on in the cluster
+        env:
+          - name: MONGO_URL
+            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:latest
+        ports:
+        - containerPort: 8080 # The port that the container is running on in the cluster
+        env:
+          - name: KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: keycloak_realm
+          - name: KEYCLOAK_AUTH_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: keycloak_auth_server_url
+          - name: KEYCLOAK_RESOURCE
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: keycloak_resource
+          - name: KEYCLOAK_CREDENTIALS_SECRET
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: keycloack_credentials_secret
+      - name: ees-ms-users-app
+        image: enexse/ees-ms-users:latest # Image that will be used to containers in the cluster
+        args: ["--spring.profiles.active=prod"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9190 # The port that the container is running on in the cluster
+        env:
+        - name: EUREKA_SERVER_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: eureka-cm
+              key: eureka_service_address
 
 ---
 

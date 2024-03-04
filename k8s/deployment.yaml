@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: ees-ms-users-app
+  labels:
+    app: ees-ms-users-app
+spec:
+  selector:
+    matchLabels:
+      app: ees-ms-users-app
+  replicas: 1 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: ees-ms-users-app
+    spec:
+      containers:
+        - name: ees-ms-users-app
+          image: enexse/ees-ms-users-app:latest # Image that will be used to containers in the cluster
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9190 # The port that the container is running on in the cluster
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata:
+  name: ees-ms-users-svc # Metadata of the resource kind we are creating
+spec:
+  selector:
+    app: ees-ms-users-app
+  ports:
+    - port: 80 # The port that the service is running on in the cluster
+      protocol: TCP
+      targetPort: 9190 # The port exposed by the service
+  type: ClusterIP # type of the service.

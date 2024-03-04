@@ -1,0 +1,83 @@
+server:
+  port: 9190
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+  cloud:
+    discovery:
+      enabled: true
+  devtools:
+    restart:
+      enabled: true
+  mail:
+    host: smtps.aruba.it
+    port: 587
+    username: software.engineering@enexse.com
+    password: Software@1234
+    protocol: smtp
+    default-encoding: UTF-8
+    application:
+      name: ms-users
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connection-timeout: 900000
+          timeout: 900000
+          write timeout: 900000
+          starttls:
+            enable: false
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+  application:
+    name: EES-MS-USERS
+  data:
+    mongodb:
+      database: ees-ms-users
+      port: 27017
+      host: localhost
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    hostname: localhost
+info:
+  app:
+    name: Secure Platform Enexse Intranet Users Microservice
+    version: 1.0
+    decription: CRUD Users | Solutions | Profiles | Activities Microservice
+swagger:
+  enable: false
+#Keycloack
+keycloak:
+  realm: ees-ms-authentification
+  auth-server-url: https://keycloak-enexse-u12566.vm.elestio.app/ #http://localhost:8080
+  resource: ees-ms-keycloak
+  credentials:
+    secret: JbkQ9O7KpRc0HOUVJNOw5TY8dJQT4W4V #trKdGRGFZIJ5RF6jjuJQGZMGLQI6dzku
+  use-resource-role-mappings: false
+  bearer-only: true
+  ssl-required: none
+#keycloak-valid:
+  #  scope: openid
+  #  grant_type: password
+  #  admin: admin
+  #  admin_pass: Key!Cyberefund1@
+  #  email_password: cHLEw79&DRVnxK
+
+#Cloudinary Stockage Cloud
+cloudinary:
+  cloud-name: dq5xn9izs
+  api-key: 135195339797177
+  secret-key: H6fAcSZs1RQgPPQDqgsAeJ8H6dk
+application:
+  url: http://localhost:4200

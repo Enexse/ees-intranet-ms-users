@@ -1,0 +1,15 @@
+server:
+  port: 9190
+spring:
+  application:
+    name: Enexse Intranet Users Microservice
+  data:
+    mongodb:
+      database: ees-ms-users
+      port: 27017
+      host: localhost
+info:
+  app:
+    name: Secure Platform Enexse Intranet Users Microservice
+    version: 1.0
+    decription: CRUD Users | Solutions | Profiles | Activities Microservice

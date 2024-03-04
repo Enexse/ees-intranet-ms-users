@@ -24,7 +24,9 @@ spec:
             value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
-        args: ["start --hostname-strict=false"]
+        command:
+        - "start"
+        - "--hostname-strict=false"
         ports:
         - containerPort: 8080 # The port that the container is running on in the cluster
         env:

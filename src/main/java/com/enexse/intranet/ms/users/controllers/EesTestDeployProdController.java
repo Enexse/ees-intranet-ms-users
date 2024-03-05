@@ -24,7 +24,7 @@ public class EesTestDeployProdController {
         return "Hello World Users Service";
     }
 
-    @GetMapping(EesUserEndpoints.EES_GET_ALL_USERS)
+    @GetMapping("/users")
     public ResponseEntity<Object> eesGetAllCollaborators() {
         return eesUserService.getAllCollaborators();
     }

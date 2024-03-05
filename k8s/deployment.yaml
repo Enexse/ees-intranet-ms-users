@@ -33,6 +33,18 @@ spec:
             value: "edge"
           - name: KC_HOSTNAME
             value: "https://keycloak-enexse-u12566.vm.elestio.app/"
+      - name: ees-ms-users-app
+        image: enexse/ees-ms-users:latest # Image that will be used to containers in the cluster
+        args: ["--spring.profiles.active=prod"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9190 # The port that the container is running on in the cluster
+        env:
+          - name: EUREKA_SERVER_ADDRESS
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: eureka_service_address
           - name: KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:
@@ -53,18 +65,6 @@ spec:
               configMapKeyRef:
                 name: eureka-cm
                 key: keycloack_credentials_secret
-      - name: ees-ms-users-app
-        image: enexse/ees-ms-users:latest # Image that will be used to containers in the cluster
-        args: ["--spring.profiles.active=prod"]
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 9190 # The port that the container is running on in the cluster
-        env:
-        - name: EUREKA_SERVER_ADDRESS
-          valueFrom:
-            configMapKeyRef:
-              name: eureka-cm
-              key: eureka_service_address
 
 ---
 

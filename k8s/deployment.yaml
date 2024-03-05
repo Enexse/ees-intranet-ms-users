@@ -43,10 +43,7 @@ spec:
         - containerPort: 9190 # The port that the container is running on in the cluster
         env:
           - name: EUREKA_SERVER_ADDRESS
-            valueFrom:
-              configMapKeyRef:
-                name: eureka-cm
-                key: eureka_service_address
+            value: "http://eureka-0.eureka:8761/eureka"
           - name: KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:

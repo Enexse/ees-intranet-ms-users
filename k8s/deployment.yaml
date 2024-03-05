@@ -20,11 +20,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 27017 # The port that the container is running on in the cluster
-        env:
-          - name: DB_NAME
-            value: "ees-ms-users"
-          - name: MONGODB_URI
-            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
         args:
@@ -68,6 +63,21 @@ spec:
               configMapKeyRef:
                 name: eureka-cm
                 key: keycloack_credentials_secret
+          - name: MONGODB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: eureka-cm
+                  key: mongodb_database
+          - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: eureka-cm
+                  key: mongodb_port
+          - name: MONGODB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: eureka-cm
+                  key: mongodb_host
 
 ---
 

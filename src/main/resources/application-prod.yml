@@ -1,9 +1,9 @@
 spring:
   data:
     mongodb:
-      database: ees-ms-users
-      port: 27017
-      host: mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web
+      database: ${MONGODB_DATABASE} #ees-ms-users
+      port: ${MONGODB_PORT} #27017
+      host: ${MONGODB_HOST} #mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web
 eureka:
   client:
     service-url:

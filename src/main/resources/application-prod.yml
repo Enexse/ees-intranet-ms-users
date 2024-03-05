@@ -6,7 +6,7 @@ spring:
       host: ${MONGODB_HOST} #mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web
 eureka:
   client:
-    service-url:
+    serviceUrl:
       defaultZone: ${EUREKA_SERVER_ADDRESS}
     fetch-registry: true
     register-with-eureka: true

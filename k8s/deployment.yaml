@@ -26,10 +26,14 @@ spec:
         image: quay.io/keycloak/keycloak:latest
         args:
           - start
-          - --hostname=https://keycloak-enexse-u12566.vm.elestio.app/
+          - --auto-build
         ports:
         - containerPort: 8080 # The port that the container is running on in the cluster
         env:
+          - name: KC_PROXY
+            value: "edge"
+          - name: KC_HOSTNAME
+            value: "https://keycloak-enexse-u12566.vm.elestio.app/"
           - name: KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:

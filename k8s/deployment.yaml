@@ -26,7 +26,6 @@ spec:
         image: quay.io/keycloak/keycloak:latest
         args:
           - start
-          - --auto-build
         ports:
         - containerPort: 8080 # The port that the container is running on in the cluster
         env:

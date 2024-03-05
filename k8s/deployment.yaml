@@ -22,11 +22,8 @@ spec:
         - name: mongodb
           containerPort: 27017 # The port that the container is running on in the cluster
         env:
-        - name: MONGODB_CONNSTRING
-          valueFrom:
-            configMapKeyRef:
-              name: eureka-cm
-              key: mongodb_host
+          - name: MONGODB_CONNSTRING
+            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
         args:

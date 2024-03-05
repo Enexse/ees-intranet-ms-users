@@ -64,20 +64,20 @@ spec:
                 name: eureka-cm
                 key: keycloack_credentials_secret
           - name: MONGODB_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: eureka-cm
-                  key: mongodb_database
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: mongodb_database
           - name: MONGODB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: eureka-cm
-                  key: mongodb_port
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: mongodb_port
           - name: MONGODB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: eureka-cm
-                  key: mongodb_host
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: mongodb_host
 
 ---
 

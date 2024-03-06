@@ -15,26 +15,6 @@ spec:
         app: ees-ms-users-app
     spec:
       containers:
-      - name: mongodb
-        image: mongo:latest
-        imagePullPolicy: Always
-        ports:
-        - name: mongodb
-          containerPort: 27017 # The port that the container is running on in the cluster
-        env:
-          - name: MONGODB_CONNSTRING
-            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
-      - name: keycloak
-        image: quay.io/keycloak/keycloak:latest
-        args:
-          - start
-        ports:
-        - containerPort: 8080 # The port that the container is running on in the cluster
-        env:
-          - name: KC_PROXY
-            value: "edge"
-          - name: KC_HOSTNAME
-            value: "https://keycloak-enexse-u12566.vm.elestio.app/"
       - name: ees-ms-users-app
         image: enexse/ees-ms-users:latest # Image that will be used to containers in the cluster
         args: ["--spring.profiles.active=prod"]
@@ -43,7 +23,10 @@ spec:
         - containerPort: 9190 # The port that the container is running on in the cluster
         env:
           - name: EUREKA_SERVER_ADDRESS
-            value: "http://eureka-0.eureka:8761/eureka"
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: eureka_service_address
           - name: KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:
@@ -79,6 +62,26 @@ spec:
               configMapKeyRef:
                 name: eureka-cm
                 key: mongodb_host
+      - name: mongodb
+        image: mongo:latest
+        imagePullPolicy: Always
+        ports:
+        - name: mongodb
+          containerPort: 27017 # The port that the container is running on in the cluster
+        env:
+          - name: MONGODB_CONNSTRING
+            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:latest
+        args:
+          - start
+        ports:
+        - containerPort: 8080 # The port that the container is running on in the cluster
+        env:
+          - name: KC_PROXY
+            value: "edge"
+          - name: KC_HOSTNAME
+            value: "https://keycloak-enexse-u12566.vm.elestio.app/"
 
 ---
 

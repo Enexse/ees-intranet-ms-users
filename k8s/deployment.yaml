@@ -62,6 +62,18 @@ spec:
               configMapKeyRef:
                 name: eureka-cm
                 key: mongodb_host
+      - name: mongodb
+        image: mongo:latest
+        imagePullPolicy: Always
+        ports:
+        - name: mongodb
+          containerPort: 27017 # The port that the container is running on in the cluster
+        env:
+          - name: MONGODB_URI
+            valueFrom:
+              secretKeyRef:
+                name: eureka-cm
+                key: mongodb_host
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
         args:

@@ -27,7 +27,8 @@ public class EesForgotPasswordController {
 
     @PostMapping(EesUserEndpoints.EES_EMAIL_USER)
     public ResponseEntity<Object> eesGetForgotPasswordLink(@RequestBody EesUserEmailRequest request) {
-        if (!eesUserService.verifyPersonalEmail(request.getEmail())) {
+        // User must pass personal email or enexse email address
+        if (!eesUserService.verifyPersonalEmail(request.getEmail()) || eesUserService.getUserByEnexseEmail(request.getEmail()).get() != null) {
             return eesVerifyIdentityService.getForgotPasswordLink(request);
         } else {
             return ResponseEntity.notFound().build();

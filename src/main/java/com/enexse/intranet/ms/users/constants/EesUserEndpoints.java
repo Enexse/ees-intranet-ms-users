@@ -19,15 +19,14 @@ public class EesUserEndpoints {
     public static final String EES_INSERT_USER = "/user/insert";
     public static final String EES_UPDATE_PROFIL_USER = "/user/updateProfil/{userId}";
     public static final String EES_UPDATE_COLLABORATOR_INFO = "/user/updateCollaboratorInfo/{userId}";
+    public static final String EES_UPDATE_COLLABORATOR_STATUS = "/user/updateCollaboratorStatus/{userId}";
     public static final String EES_GET_DEPARTMENT = "/user/getDepartment/{userId}";
     public static final String EES_GET_ROLE = "/user/getRole/{userId}";
     public static final String EES_GET_ENTITY = "/user/getEntity/{userId}";
     public static final String EES_GET_PROFESSION = "/user/getProfession/{userId}";
     public static final String EES_GET_LAST_USERS = "/user/getLastUsers";
     public static final String EES_GET_ALL_USERS_PAGINATED = "/user/getAllPaginated";
-
     public static final String EES_GET_ALL_USERS_FILTRED = "/user/getAllFiltred";
-
     public static final String EES_GET_ALL_USERS = "/user/getAll";
     public static final String EES_UPDATE_USER = "/user/update/{userId}";
     public static final String EES_ARCHIVE_USER = "/user/archive/{userId}";
@@ -49,17 +48,20 @@ public class EesUserEndpoints {
     public static final String EES_UPDATE_USER_INFO_LANGUAGE = "/user/update/language";
     public static final String EES_UPDATE_USER_INFO_2FACTORY_AUTH = "/user/update/auth2Factory";
     public static final String EES_VERIFY_CODE_AUTH = "/user/verify/authCode";
+    public static final String EES_RESEND_INVITATION_USER = "/user/resendInvitation";
 
+    // USER CAREERS
     public static final String EES_ADD_MISSION_TO_COLLABORATOR = "/user/addMission/{userId}";
     public static final String EES_DELETE_MISSION_FROM_COLLABORATOR = "/user/deleteMission/{userId}";
     public static final String EES_DELETE_FORMATION_FROM_COLLABORATOR = "/user/deleteFormation/{userId}";
 
+    // USER FORMATIONS
     public static final String EES_GET_MISSIONS_FROM_COLLABORTOR = "/user/getMissions/{userId}";
     public static final String EES_GET_FORMATIONS_FROM_COLLABORTOR = "/user/getFormations/{userId}";
     public static final String EES_UPDATE_MISSION_COLLABORATOR = "/user/updateMission/{userId}";
+    public static final String EES_ADD_COMMENT_MISSION_COLLABORATOR = "/user/addCommentMission/{userId}";
     public static final String EES_UPDATE_FORMATION_COLLABORATOR = "/user/updateFormation/{userId}";
-
-    public static final String EES_ADD_FORMATION_TO_COLLABORATOR = "/user/addformation/{userId}";
+    public static final String EES_ADD_FORMATION_TO_COLLABORATOR = "/user/addFormation/{userId}";
 
     // GROUPS
     public static final String EES_INSERT_GROUP = "/group/insert";
@@ -68,7 +70,7 @@ public class EesUserEndpoints {
     public static final String EES_GET_GROUP_BY_CODE = "/group/getByCode/{groupCode}";
     public static final String EES_UPDATE_GROUP_BY_CODE = "/group/updateByCode/{groupCode}";
     public static final String EES_SEND_MAIL_TO_GROUP = "/group/sendMail";
-    public static final String EES_SEND_MAIL_TO_Collaborator = "/collaborator/sendMail";
+    public static final String EES_SEND_MAIL_TO_COLLABORATOR = "/collaborator/sendMail";
 
     // ROLES
     public static final String EES_INSERT_ROLE = "/role/insert";
@@ -156,7 +158,7 @@ public class EesUserEndpoints {
     public static final String EES_UPDATE_STATUS_REQUEST = "/update/requestAutomatic/{id}";
     public static final String EES_GET_REQUEST = "/get/request/{id}";
     public static final String EES_GET_LAST_REQUESTS = "/get/lastRequests";
-    public static final String EES_GET_REQUESTS_BY_USER = "get/requests/{userId}";
+    public static final String EES_GET_REQUESTS_BY_USER = "/get/requests/{userId}";
 
     //public static final String EES_GET_LIST_OF_SUB_REQUESTS_BY_TITLE = "/list-of-subrequests-by-title/{requestTitle}";
 
@@ -198,6 +200,7 @@ public class EesUserEndpoints {
     public static final String EES_UPDATE_MESSAGE_TYPE = "/message/type/update/{code}";
     public static final String EES_DELETE_MESSAGE_TYPE = "/message/type/delete/{code}";
     public static final String EES_GET_All_MESSAGE_TYPES = "/message/getAllMessageTypes";
+    public static final String EES_ACTIVATE_MESSAGE_TYPE_BY_CODE = "/message/type/activateDisableByCode/{code}";
 
     // ALERT MESSAGE
     public static final String EES_ALERT_MESSAGE = "/alert/insert";
@@ -217,9 +220,14 @@ public class EesUserEndpoints {
 
     // CLOUNDINARY
     public static final String EES_CLOUDINARY_INSERT_FILE = "/file/insert";
+    public static final String EES_CLOUDINARY_ATTACHMENT_FILES = "/file/attachments/{userId}";
     public static final String EES_CLOUDINARY_GET_ALL_FILES = "/files/getAll";
-    public static final String EES_CLOUDINARY_DELETE_FILE = "/file/delete";
+    public static final String EES_CLOUDINARY_GET_ALL_FILES_USER = "/files/getAllByUserId/{userId}";
+    public static final String EES_CLOUDINARY_GET_ALL_FILES_USER_UPLOAD_TYPE = "/files/getAllByUserIdAndUploadType/{userId}";
+    public static final String EES_CLOUDINARY_DELETE_FILE_BY_ID = "/file/deleteById";
+    public static final String EES_CLOUDINARY_DELETE_FILE_BY_PUBLIC_ID = "/file/deleteByPublicId";
     public static final String EES_CLOUDINARY_FIND_FILE = "/file";
+    public static final String EES_CLOUDINARY_FIND_FILE_BY_ID_USERID = "/file/get/{id}/{userId}";
 
     // CASE NUMBER
     public static final String EES_INSERT_CASE_NUMBER = "/caseNumber/insert";

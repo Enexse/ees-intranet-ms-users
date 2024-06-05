@@ -26,26 +26,31 @@ public class EesAlertMessageController {
     public ResponseEntity<Object> eesInsertAlert(@Valid @RequestBody EesMessageAlertRequest alertRequest) {
         return alertService.addAlertMessage(alertRequest);
     }
-    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR,EesUserConstants.EES_ROLE_COLLABORATOR,EesUserConstants.EES_ROLE_RESPONSABLE})
+
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_COLLABORATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_All_ALERTS)
     public List<EesMessageAlert> getAlerts() {
         return alertService.getAlerts();
     }
+
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @GetMapping(EesUserEndpoints.EES_GET_ALERT)
     public ResponseEntity<Object> getAlert(@PathVariable String id) {
         return alertService.getAlertById(id);
     }
+
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @PutMapping(EesUserEndpoints.EES_CHANGE_STATUS_ALERT)
     public ResponseEntity<Object> eesChangeStatusAlert(@PathVariable String id, @RequestParam(value = "alertStatus", required = true) boolean alertStatus) {
         return alertService.changeStatus(id, alertStatus);
     }
+
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @PutMapping(EesUserEndpoints.EES_UPDATE_ALERT)
     public ResponseEntity<Object> eesUpdateAlertByCode(@PathVariable String id, @RequestBody EesMessageAlertRequest request) {
         return alertService.updateAlert(id, request);
     }
+
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @DeleteMapping(EesUserEndpoints.EES_DELETE_ALERT)
     public ResponseEntity<Object> eesDeleteAlertByCode(@PathVariable String id) {

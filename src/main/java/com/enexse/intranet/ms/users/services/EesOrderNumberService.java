@@ -2,6 +2,7 @@ package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
 import com.enexse.intranet.ms.users.models.EesCustomer;
+import com.enexse.intranet.ms.users.models.EesNews;
 import com.enexse.intranet.ms.users.models.EesOrderNumber;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.payload.request.EesOrderNumberRequest;
@@ -16,9 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -64,7 +67,8 @@ public class EesOrderNumberService {
     }
 
     public List<EesOrderNumber> getAllOrderNumbers() {
-        List<EesOrderNumber> orderNumbers = eesOrderNumberRepository.findAll();
+        List<EesOrderNumber> orderNumbers = eesOrderNumberRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesOrderNumber::getCreatedAt).reversed()).collect(Collectors.toList());
         return orderNumbers;
     }
 

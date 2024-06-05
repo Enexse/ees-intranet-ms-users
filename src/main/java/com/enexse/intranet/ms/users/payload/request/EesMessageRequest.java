@@ -16,7 +16,7 @@ public class EesMessageRequest {
     private String lastName;
     private String email;
     private String phone;
-    private String country;
+    private String messageType;
     private String subject;
     private String message;
 }

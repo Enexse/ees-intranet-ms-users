@@ -15,9 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -69,7 +71,8 @@ public class EesSubRequestService {
     }
 
     public List<EesUserSubRequest> getAllSubRequests() {
-        List<EesUserSubRequest> subRequests = eesSubRequestRepository.findAll();
+        List<EesUserSubRequest> subRequests = eesSubRequestRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesUserSubRequest::getCreatedAt).reversed()).collect(Collectors.toList());
         return subRequests;
     }
 

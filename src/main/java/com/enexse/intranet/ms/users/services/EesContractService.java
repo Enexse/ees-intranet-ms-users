@@ -1,7 +1,7 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
-import com.enexse.intranet.ms.users.enums.EesStatusCustomer;
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import com.enexse.intranet.ms.users.models.EesContract;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.payload.request.EesContractRequest;
@@ -15,9 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -49,7 +51,7 @@ public class EesContractService {
                     .contractCode(request.getContractCode().toUpperCase(Locale.ROOT))
                     .contractTitle(request.getContractTitle())
                     .contractDescription(request.getContractDescription())
-                    .status(EesStatusCustomer.ACTIVE)
+                    .status(EesStatus.ACTIVE)
                     .createdAt(EesCommonUtil.generateCurrentDateUtil())
                     .updatedAt(EesCommonUtil.generateCurrentDateUtil())
                     .createdBy(user.get())
@@ -60,7 +62,9 @@ public class EesContractService {
     }
 
     public List<EesContract> getAllContracts() {
-        List<EesContract> contracts = eesContractRepository.findAll();
+        List<EesContract> contracts = eesContractRepository
+                .findAll()
+                .stream().sorted(Comparator.comparing(EesContract::getCreatedAt).reversed()).collect(Collectors.toList());
         return contracts;
     }
 
@@ -113,7 +117,7 @@ public class EesContractService {
         if (contract == null) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_CONTRACT_NOT_FOUND, contractCode)), HttpStatus.NOT_FOUND);
         } else {
-            contract.setStatus(status.compareToIgnoreCase(EesStatusCustomer.ACTIVE.getStatus()) == 0 ? EesStatusCustomer.DISABLED : EesStatusCustomer.ACTIVE);
+            contract.setStatus(status.compareToIgnoreCase(EesStatus.ACTIVE.getStatus()) == 0 ? EesStatus.DISABLED : EesStatus.ACTIVE);
             contract.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
             eesContractRepository.save(contract);
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_CONTRACT_UPDATED_STATUS), HttpStatus.OK);

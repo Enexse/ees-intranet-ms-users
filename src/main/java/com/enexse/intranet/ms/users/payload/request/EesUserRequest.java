@@ -14,8 +14,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class EesUserRequest {
 
+    private String responsible;
     private String firstName;
     private String lastName;
+    private String nationality;
+    private String dateOfBirth;
     private String personalEmail;
     private String enexseEmail;
     private String password;

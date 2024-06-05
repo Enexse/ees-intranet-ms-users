@@ -36,7 +36,7 @@ public class EesUserResponse {
 
     // USERS
     public static final String EES_USER_CREATED = "User created successfully.";
-    public static final String EES_USER_ALREADY_EXISTS = "User already exists with the Personal email %s in our intranet Enexse. Try to contact the administration system.";
+    public static final String EES_USER_ALREADY_EXISTS = "User already exists with the email %s in our intranet Enexse. Try to contact the administration system.";
     public static final String EES_MATRICULE_ALREADY_EXISTS = "matricule %s already exists in database!!";
     public static final String EES_USER_NOT_FOUND = "User not found with %s";
     public static final String EES_USER_CERTIFICATION_LINK = "Confirmation link to certify your identity successfully send to %s";
@@ -157,7 +157,8 @@ public class EesUserResponse {
 
     // CREATE REQUEST
     public static final String EES_CREATE_REQUEST_CREATED = "Request created successfully";
-    public static final String EES_REQUEST_ATTACH_FILES = "files attached exceeds the size limits(3MB)";
+    public static final String EES_REQUEST_ATTACH_FILES = "Files attached exceeds the size limits (3MB)";
+    public static final String EES_REQUEST_EXTENSION_FILES = "Invalid extension file. Allowed extensions: ";
     public static final String EES_REQUEST_STATUS_UPDATED = "Request status updated ";
 
     // ERRORS USER
@@ -206,6 +207,7 @@ public class EesUserResponse {
     public static final String EES_MESSAGE_TYPE_NOT_FOUND = "Message type not found with code ";
     public static final String EES_MESSAGE_TYPE_UPDATED = "Message type updated successfully";
     public static final String EES_MESSAGE_TYPE_DELETED = "Message type deleted successfully";
+    public static final String EES_MESSAGE_TYPE_UPDATED_STATUS = "Message type status updated successfully.";
 
     // ALERT MESSAGE
     public static final String EES_AlERT_CREATED = "Alert Message created Successfully";

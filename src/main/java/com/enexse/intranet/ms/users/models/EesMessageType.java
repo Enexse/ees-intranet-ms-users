@@ -1,5 +1,6 @@
 package com.enexse.intranet.ms.users.models;
 
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class EesMessageType {
     private String id;
 
     private String code;
+    private EesStatus status;
     private String title;
     private String description;
     private String createdAt;

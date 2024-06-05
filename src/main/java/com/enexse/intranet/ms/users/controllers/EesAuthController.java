@@ -22,7 +22,6 @@ public class EesAuthController {
     private EesAuthService authService;
     private EesUserRepository eesUserRepository;
 
-
     @PostMapping(EesUserEndpoints.EES_AUTH_USER)
     public ResponseEntity<EesUser> eesLogin(@RequestBody @Valid EesUserAuthRequest credentials) {
         String pseudo = credentials.getPseudo();

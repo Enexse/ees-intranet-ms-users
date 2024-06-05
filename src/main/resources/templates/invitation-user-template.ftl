@@ -14,8 +14,8 @@
     <tr>
         <td align="center" valign="center" style="text-align:center; padding: 40px">
             <a href="http://www.enexse.com/" rel="noopener" target="_blank">
-                <img src="https://enexse-demo.netlify.app/assets/images/EES-logoWeb-primary.png" alt="Logo Enexse"
-                     style="width: 50%"/>
+                <img src="https://dct-enexse.onrender.com/assets/images/EES-logoWeb-primary.png" alt="Logo Enexse"
+                />
             </a>
         </td>
     </tr>
@@ -28,7 +28,8 @@
     </div>
     <div style="padding-bottom: 5px">Nous vous informons d'une adresse e-mail a été créée.
     </div>
-    <div style="padding-bottom: 5px">Vous trouverez également le livret d'acceuil de bienvenue, ci-joint. Veuillez le lire attentivement.
+    <div style="padding-bottom: 5px">Vous trouverez également le livret d'acceuil de bienvenue, ci-joint. Veuillez le
+        lire attentivement.
     </div>
     <div style="padding-bottom: 15px">Pour accéder merci de suivre les instructions suivantes :</div>
     <div style="padding-bottom: 5px">Connecte-toi au site
@@ -82,7 +83,8 @@
         <span style="padding-bottom: 15px; font-weight: bold; text-decoration: underline; left: 25px; position: relative;">2. Procédure  de transfert vers adresse personnel et/ou Professionnelle Client :</span>
     </div>
     <div style="padding-bottom: 40px; text-align:center;">
-        <img style="width: 100%: height: 100%" alt="Set Up Aruba Mail" src="https://res.cloudinary.com/kazougroup-srl/image/upload/v1684205199/Set_up_Aruba_Mail_tduovs.png" />
+        <img style="width: 100%; height: 100%;" alt="Set Up Aruba Mail"
+             src="https://res.cloudinary.com/kazougroup-srl/image/upload/v1684205199/Set_up_Aruba_Mail_tduovs.png"/>
     </div>
     <div style="padding-bottom: 30px">Pour tous les renseignements supplémentaires n’hésite pas à nous contacter
     </div>

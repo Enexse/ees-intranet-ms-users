@@ -11,8 +11,8 @@ public class EesUserConstants {
     public static final String EES_SECRET_KEY = "ees-ms-management";
     public static final int EES_EXPIRATION_TOKEN = 1000 * 60 * 60 * 8;
     public static final int EES_AVATAR_MAX_SIZE = 3 * 1024 * 1024;
-    public static final List<String> EES_ALLOWED_EXTENTIONS = Arrays.asList(".png", ".jpg", ".jpeg");
-    public static final List<String> EES_ALLOWED_EXTENTIONS_REQUEST = Arrays.asList(".pdf", ".png", ".jpg", ".jpeg");
+    public static final List<String> EES_ALLOWED_EXTENSIONS = Arrays.asList(".png", ".jpg", ".jpeg");
+    public static final List<String> EES_ALLOWED_EXTENSIONS_REQUEST = Arrays.asList(".pdf", ".png", ".jpg", ".jpeg", ".docx", ".doc", ".xlsx");
     public static final int EES_EXPIRATION_LINK = 15; // TODO: Change later to 15
     public static final int EES_EXPIRATION_DAYS_TO = 90;
     public static final String EES_RANDOM_CHARS = "~`!@#$%^&*()-_=+[{]}\\\\|;:\\'\\\",<.>/?\"";
@@ -61,9 +61,12 @@ public class EesUserConstants {
             "--bs-body",
     };
     public static final String EES_CLOUDINARY_MANUAL_DOC_FOLDER = "Intranet/Manual Documentation";
+    public static final String EES_CLOUDINARY_REQUEST_FOLDER = "Requests Collaborators";
+    public static final String EES_CLOUDINARY_TIMESHEET_FOLDER = "Timesheet Collaborators";
     public static final String EES_CLOUDINARY_MANUAL_DOC_TYPE = "EES_CLOUDINARY_MANUAL_DOC_TYPE";
-
-    public static final String EES_CLOUDINARY_WELCOMEL_BOOKLET_TYPE = "EES_CLOUDINARY_WELCOME_BOOKLET_TYPE";
+    public static final String EES_CLOUDINARY_TIMESHEET_TYPE = "EES_CLOUDINARY_TIMESHEET_TYPE";
+    public static final String EES_CLOUDINARY_REQUEST_TYPE = "EES_CLOUDINARY_REQUEST_TYPE";
+    public static final String EES_CLOUDINARY_WELCOME_BOOKLET_TYPE = "EES_CLOUDINARY_WELCOME_BOOKLET_TYPE";
 
     // MODELS
     public static final String EES_USER_REQUIRED = "User is required";
@@ -101,8 +104,16 @@ public class EesUserConstants {
     public static final String EES_PATTERN_PASSWORD = "/^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9!@#$%^&*]{8,30}$/";
     public static final String EES_PATTERN_DATE = "yyyy/MM/dd HH:mm:ss";
 
+    // PRIVILEGES
     public static final String EES_ROLE_ADMINISTRATOR = "EES-ADMINISTRATOR";
     public static final String EES_ROLE_COLLABORATOR = "EES-COLLABORATOR";
     public static final String EES_ROLE_RESPONSABLE = "EES-RESPONSABLE";
     public static final String EES_DEFAULT_ROLES = "default-roles-ees-ms-authentification";
+
+    public static final String EES_REQUEST_CODE_INVITATION = "EES-DMD-INV";
+    public static final String EES_REQUEST_TITLE_INVITATION = "Activation of the ENEXSE email address";
+    public static final String EES_SUB_REQUEST_CODE_INVITATION = "EES-DMD-INV-COL";
+    public static final String EES_SUB_REQUEST_DESCRIPTION_INVITATION = "Request to create the %s email in enexse format";
+    public static final String EES_REQUEST_AUTOMATIC = "Automatic";
+    public static final String EES_REQUEST_MANUAL = "Manual";
 }

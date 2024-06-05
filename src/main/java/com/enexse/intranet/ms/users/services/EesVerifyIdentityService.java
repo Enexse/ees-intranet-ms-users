@@ -29,6 +29,7 @@ public class EesVerifyIdentityService {
     private EesMailUtil eesMailUtil;
     private EesUserService eesUserService;
     private EesMailService eesMailService;
+    private EesFrontEndLink eesFrontEndLink;
 
     public ResponseEntity<Object> getForgotPasswordLink(EesUserEmailRequest request) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -37,7 +38,12 @@ public class EesVerifyIdentityService {
         Map<String, Object> model = new HashMap<>();
 
         try {
+            // First find user with personal email
             user = eesUserRepository.findByPersonalEmail(request.getEmail());
+            if (!user.isPresent()) {
+                // If user not present, then find wit enexse email
+                user = eesUserService.getUserByEnexseEmail(request.getEmail());
+            }
             if (user.isPresent()) {
                 list = eesVerifyIdentityRepository.findByUserId(user.get().getUserId());
                 if (list.isPresent()) {
@@ -58,7 +64,7 @@ public class EesVerifyIdentityService {
                         .link(UUID.randomUUID().toString())
                         .build();
                 eesVerifyIdentityRepository.save(verifyIdentity);
-                String link = EesFrontEndLink.EES_LINK_UPDATE_PASSWORD + verifyIdentity.getLink() + "&expirationDate=" + verifyIdentity.getExpiry_date() + "&verifyType="
+                String link = eesFrontEndLink.getEesLinkUpdatePassword() + verifyIdentity.getLink() + "&expirationDate=" + verifyIdentity.getExpiry_date() + "&verifyType="
                         + verifyIdentity.getVerifyType();
                 link = link.replaceAll("\\s", "");
                 System.out.println(link);
@@ -96,7 +102,12 @@ public class EesVerifyIdentityService {
         ResponseEntity<Object> response = null;
 
         try {
+            // First find user with personal email
             user = eesUserRepository.findByPersonalEmail(email);
+            if (!user.isPresent()) {
+                // If user not present, then find wit enexse email
+                user = eesUserService.getUserByEnexseEmail(email);
+            }
             if (user.isPresent()) {
                 Optional<EesVerifyIdentity> identity = null;
                 try {
@@ -105,12 +116,12 @@ public class EesVerifyIdentityService {
                         identity.get().setExpiry_date(EesCommonUtil.generateExpirationLink());
                         eesVerifyIdentityRepository.save(identity.get());
                         if (verifyType.compareToIgnoreCase(EesUserConstants.EES_VERIFY_TYPE_FORGOT_PASSWORD) == 0) {
-                            urlLink = EesFrontEndLink.EES_LINK_UPDATE_PASSWORD + identity.get().getLink() + "&expirationDate=" + identity.get().getExpiry_date() + "&verifyType="
+                            urlLink = eesFrontEndLink.getEesLinkUpdatePassword() + identity.get().getLink() + "&expirationDate=" + identity.get().getExpiry_date() + "&verifyType="
                                     + identity.get().getVerifyType();
                             response = eesMailService.sendForgotPasswordLinkToUserEmail(user, email, urlLink, EesUserConstants.EES_VERIFY_TYPE_FORGOT_PASSWORD);
                         }
                         if (verifyType.compareToIgnoreCase(EesUserConstants.EES_VERIFY_TYPE_EMAIL_VERIFICATION) == 0) {
-                            urlLink = EesFrontEndLink.EES_LINK_CERTIFIED_EMAIL + identity.get().getLink() + "&expirationDate=" + identity.get().getExpiry_date() + "&verifyType="
+                            urlLink = eesFrontEndLink.getEesLinkCertifiedEmail() + identity.get().getLink() + "&expirationDate=" + identity.get().getExpiry_date() + "&verifyType="
                                     + identity.get().getVerifyType();
                             response = eesMailService.certificationUserEmail(email, urlLink, EesUserConstants.EES_VERIFY_TYPE_EMAIL_VERIFICATION);
                         }

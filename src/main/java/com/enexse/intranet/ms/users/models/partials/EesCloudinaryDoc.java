@@ -20,6 +20,7 @@ public class EesCloudinaryDoc {
     private String cloudinaryId;
 
     private String eesUploadType;
+    private String userId;
     private String signature;
     private String format;
     private String resourceType;

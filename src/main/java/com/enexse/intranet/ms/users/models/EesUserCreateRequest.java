@@ -1,6 +1,7 @@
 package com.enexse.intranet.ms.users.models;
 
 import com.enexse.intranet.ms.users.enums.EesStatusRequest;
+import com.enexse.intranet.ms.users.models.partials.EesCloudinaryDoc;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class EesUserCreateRequest {
     private EesUser recipient;
     private EesUser referent;
     private String comments;
+    private String decline;
 
     @DBRef
     private EesUser user;
@@ -38,5 +40,8 @@ public class EesUserCreateRequest {
     private EesStatusRequest status;
     private String createdAt;
     private String updatedAt;
-    private HashMap<String, String> attachmentFileIds;
+    //private HashMap<String, String> attachmentFileIds;
+
+    @DBRef
+    private List<EesCloudinaryDoc> attachments;
 }

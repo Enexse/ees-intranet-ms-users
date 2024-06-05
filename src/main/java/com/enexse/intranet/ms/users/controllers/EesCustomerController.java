@@ -39,7 +39,7 @@ public class EesCustomerController {
         return eesCustomerService.getCustomerByCode(customerCode);
     }
 
-//    @RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES)
+    //@RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES)
     @GetMapping(EesUserEndpoints.EES_GET_CUSTOMER_BY_ID)
     public EesCustomer eesGetCustomerById(@PathVariable String customerId) {
         return eesCustomerService.getCustomerById(customerId);

@@ -10,6 +10,7 @@ import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.models.EesUserRole;
 import com.enexse.intranet.ms.users.payload.request.EesCreateUserRequest;
 import com.enexse.intranet.ms.users.payload.request.EesLoginRequest;
+import com.enexse.intranet.ms.users.payload.response.EesMessageResponse;
 import com.enexse.intranet.ms.users.repositories.EesRoleRepository;
 import com.enexse.intranet.ms.users.repositories.EesUserRepository;
 import com.enexse.intranet.ms.users.utils.EesCommonUtil;
@@ -69,31 +70,35 @@ public class KeycloakAdminClientService {
         return eesUser.isPresent();
     }
 
-    public Response createKeycloakUser(EesCreateUserRequest request, String personalEmail) throws Exception {
-        UsersResource usersResource = kcProvider.getInstance().realm(realm).users();
-        String password = request.getFirstName() + "@1234";
-        CredentialRepresentation credentialRepresentation = createPasswordCredentials(password);
+    public ResponseEntity<Object> createKeycloakUser(EesCreateUserRequest request, String personalEmail) throws Exception {
+        // First find if user already exists with enexse email
+        Optional<EesUser> eesKcUser = eesUserRepository.findByEnexseEmail(request.getEmail());
+        if (!eesKcUser.isPresent()) {
+            UsersResource usersResource = kcProvider.getInstance().realm(realm).users();
+            String password = request.getFirstName() + "@1234";
+            CredentialRepresentation credentialRepresentation = createPasswordCredentials(password);
 
-        UserRepresentation kcUser = new UserRepresentation();
-        kcUser.setUsername(request.getEmail());
-        kcUser.setCredentials(Collections.singletonList(credentialRepresentation));
-        kcUser.setFirstName(request.getFirstName());
-        kcUser.setLastName(request.getLastName());
-        kcUser.setEmail(request.getEmail());
-        kcUser.setEnabled(true);
-        kcUser.setEmailVerified(false);
-        try {
+            // Set user keycloak
+            UserRepresentation kcUser = new UserRepresentation();
+            kcUser.setUsername(request.getEmail());
+            kcUser.setCredentials(Collections.singletonList(credentialRepresentation));
+            kcUser.setFirstName(request.getFirstName());
+            kcUser.setLastName(request.getLastName());
+            kcUser.setEmail(request.getEmail());
+            kcUser.setEnabled(true);
+            kcUser.setEmailVerified(false);
+
             Optional<EesUser> eesUser = eesUserRepository.findByPersonalEmail(personalEmail);
             if (eesUser.isPresent()) {
                 Response response = usersResource.create(kcUser);
                 if (response.getStatus() == 201) {
 
-                    //Retrieve the role
+                    // Retrieve the role
                     EesUserRole userRole = eesRoleRepository.findByCode(request.getRoleCode());
 
                     // Retrieve the Keycloak user ID from the response
                     String kcUserId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
-                    //update the user to the microservice database
+                    // update the user to the microservice database
                     eesUser.get().setKeycloakId(kcUserId);
                     eesUser.get().setRole(userRole);
                     eesUser.get().setEnexseEmail(request.getEmail());
@@ -102,29 +107,27 @@ public class KeycloakAdminClientService {
                     eesUser.get().setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
                     eesUserRepository.save(eesUser.get());
 
-                    //asign role after saving user in database because we need keycloakId of the user for the operation
+                    // Assign role after saving user in database because we need keycloakId of the user for the operation
                     assignUserRole(eesUser.get().getUserId(), userRole.getKeycloakRole());
 
                     userRole.getUsers().add(eesUser.get().getUserId());
                     eesRoleRepository.save(userRole);
-                }
 
-                ResponseEntity<Object> emailResponse = mailService.invitationUserEmail(eesUser.get().getPersonalEmail(), password, EesUserConstants.EES_VERIFY_TYPE_INVITATION_USER);
-                System.out.println(emailResponse.getStatusCode());
-                if (emailResponse.getStatusCode() == HttpStatus.OK) {
-                    // L'email a été envoyé avec succès
-                    System.out.println("email envoyé");
-                    return Response.ok(emailResponse.getBody()).build();
+                    // Send email to new collaborator
+                    ResponseEntity<Object> emailResponse = mailService.invitationUserEmail(eesUser.get().getPersonalEmail(), password, EesUserConstants.EES_VERIFY_TYPE_INVITATION_USER);
+                    System.out.println(emailResponse.getStatusCode());
+                    if (emailResponse.getStatusCode() == HttpStatus.OK) {
+                        // Email successfully sent to collaborator
+                        return ResponseEntity.ok(emailResponse.getBody());
+                    }
+                    return new ResponseEntity<Object>(new EesMessageResponse(
+                            EesUserResponse.EES_USER_ERROR_SEND_EMAIL + personalEmail),
+                            HttpStatus.INTERNAL_SERVER_ERROR);
                 }
-                return response;
-            } else {
-                throw new Exception("user does not exists in database");
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println(ex.getMessage());
+            return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_ALREADY_EXISTS, personalEmail)), HttpStatus.BAD_REQUEST);
         }
-        return null;
+        return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_ALREADY_EXISTS, request.getEmail())), HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<AccessTokenResponse> loginUser(EesLoginRequest loginRequest) {

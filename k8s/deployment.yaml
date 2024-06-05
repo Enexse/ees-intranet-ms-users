@@ -70,7 +70,10 @@ spec:
           containerPort: 27017 # The port that the container is running on in the cluster
         env:
           - name: MONGODB_URI
-            value: "mongodb+srv://ees-intranet-web:ees-intranet-web@ees-intranet-web.mp0oobs.mongodb.net/?retryWrites=true&w=majority&appName=ees-intranet-web"
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: mongodb_uri
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
         args:
@@ -81,7 +84,10 @@ spec:
           - name: KC_PROXY
             value: "edge"
           - name: KC_HOSTNAME
-            value: "https://keycloak-enexse-u12566.vm.elestio.app/"
+            valueFrom:
+              configMapKeyRef:
+                name: eureka-cm
+                key: keycloak_auth_server_url
 
 ---
 

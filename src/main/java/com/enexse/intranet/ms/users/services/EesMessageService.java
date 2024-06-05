@@ -1,6 +1,7 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import com.enexse.intranet.ms.users.models.EesMessage;
 import com.enexse.intranet.ms.users.models.EesMessageType;
 import com.enexse.intranet.ms.users.models.EesUser;
@@ -17,9 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -36,7 +39,7 @@ public class EesMessageService {
                 .lastName(messageRequest.getLastName())
                 .email(messageRequest.getEmail())
                 .phone(messageRequest.getPhone())
-                .country(messageRequest.getCountry())
+                .messageType(messageRequest.getMessageType())
                 .defaultAvatar(EesCommonUtil.generateDefaultAvatar())
                 .subject(messageRequest.getSubject())
                 .message(messageRequest.getMessage())
@@ -48,7 +51,8 @@ public class EesMessageService {
     }
 
     public List<EesMessage> getAllMessages() {
-        List<EesMessage> messages = msgRepository.findAll();
+        List<EesMessage> messages = msgRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesMessage::getCreatedAt).reversed()).collect(Collectors.toList());
         return messages;
     }
 
@@ -73,6 +77,7 @@ public class EesMessageService {
                     .builder()
                     .code(request.getCode().toUpperCase(Locale.ROOT))
                     .title(request.getTitle())
+                    .status(EesStatus.ACTIVE)
                     .description(request.getDescription())
                     .createdAt(EesCommonUtil.generateCurrentDateUtil())
                     .updatedAt(EesCommonUtil.generateCurrentDateUtil())
@@ -84,7 +89,8 @@ public class EesMessageService {
     }
 
     public List<EesMessageType> getAllMessageTypes() {
-        List<EesMessageType> messageTypes = eesMessageTypeRepository.findAll();
+        List<EesMessageType> messageTypes = eesMessageTypeRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesMessageType::getCreatedAt).reversed()).collect(Collectors.toList());
         return messageTypes;
     }
 
@@ -128,6 +134,18 @@ public class EesMessageService {
                 eesMessageTypeRepository.save(messageType);
                 return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_MESSAGE_TYPE_UPDATED), HttpStatus.OK);
             }
+        }
+    }
+
+    public ResponseEntity<Object> changeStatusMessageType(String code, String status) {
+        EesMessageType messageType = eesMessageTypeRepository.findByCode(EesUserResponse.EES_MESSAGE_TYPE_PREFIX + code);
+        if (messageType == null) {
+            return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_MESSAGE_TYPE_NOT_FOUND, code)), HttpStatus.NOT_FOUND);
+        } else {
+            messageType.setStatus(status.compareToIgnoreCase(EesStatus.ACTIVE.getStatus()) == 0 ? EesStatus.DISABLED : EesStatus.ACTIVE);
+            messageType.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
+            eesMessageTypeRepository.save(messageType);
+            return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_MESSAGE_TYPE_UPDATED_STATUS), HttpStatus.OK);
         }
     }
 }

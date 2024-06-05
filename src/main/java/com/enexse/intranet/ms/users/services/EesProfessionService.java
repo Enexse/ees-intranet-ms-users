@@ -1,6 +1,7 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
+import com.enexse.intranet.ms.users.models.EesMessageAlert;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.models.EesUserDepartment;
 import com.enexse.intranet.ms.users.models.EesUserProfession;
@@ -15,10 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -141,7 +140,8 @@ public class EesProfessionService {
     }
 
     public List<EesUserProfession> getAllProfessions() {
-        List<EesUserProfession> professions = professionRepository.findAll();
+        List<EesUserProfession> professions = professionRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesUserProfession::getCreatedAt).reversed()).collect(Collectors.toList());
         return professions;
     }
 

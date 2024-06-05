@@ -14,4 +14,5 @@ public class EesResponseManualRequest {
 
     private EesStatusRequest status;
     private String note;
+    private String decline;
 }

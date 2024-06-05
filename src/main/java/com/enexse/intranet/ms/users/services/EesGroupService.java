@@ -1,8 +1,8 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
-import com.enexse.intranet.ms.users.models.*;
-import com.enexse.intranet.ms.users.payload.request.EesDepartmentRequest;
+import com.enexse.intranet.ms.users.models.EesGroup;
+import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.payload.request.EesGroupRequest;
 import com.enexse.intranet.ms.users.payload.response.EesMessageResponse;
 import com.enexse.intranet.ms.users.repositories.EesGroupRepository;
@@ -14,16 +14,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EesGroupService {
 
     private EesGroupRepository eesGroupRepository;
-    private EesUserRepository eesUserRepository ;
+    private EesUserRepository eesUserRepository;
 
     public ResponseEntity<Object> insertGroup(EesGroupRequest request) {
         Optional<EesUser> user = eesUserRepository.findByEnexseEmail(request.getCreatedBy());
@@ -36,7 +37,8 @@ public class EesGroupService {
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_GROUP_INVALID_LENGTH), HttpStatus.BAD_REQUEST);
         }
 
-        Optional<EesGroup> existingGroup = eesGroupRepository.findByCode(request.getGroupCode().toUpperCase(Locale.ROOT));
+        //Optional<EesGroup> existingGroup = eesGroupRepository.findByCode(request.getGroupCode().toUpperCase(Locale.ROOT));
+        Optional<EesGroup> existingGroup = eesGroupRepository.findByGroupCodeAndCreatedBy(request.getGroupCode(), user.get());
 
         if (existingGroup.isPresent()) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_GROUP_ALREADY_EXISTS, request.getGroupCode())), HttpStatus.BAD_REQUEST);
@@ -65,12 +67,13 @@ public class EesGroupService {
 
     public ResponseEntity<Object> getAllGroups() {
         List<EesGroup> list = null;
-        list = eesGroupRepository.findAll();
+        list = eesGroupRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesGroup::getCreatedAt).reversed()).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 
-    public Optional<EesGroup> getGroupByCode(String groupCode){
-        if(!groupCode.startsWith(EesUserResponse.EES_GROUP_PREFIX)){
+    public Optional<EesGroup> getGroupByCode(String groupCode) {
+        if (!groupCode.startsWith(EesUserResponse.EES_GROUP_PREFIX)) {
             groupCode = EesUserResponse.EES_GROUP_PREFIX + groupCode;
         }
         return eesGroupRepository.findByCode(groupCode);
@@ -81,12 +84,12 @@ public class EesGroupService {
         Optional<EesUser> user = null;
         user = eesUserRepository.findByEnexseEmail(request.getCreatedBy());
 
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND, request.getCreatedBy())), HttpStatus.BAD_REQUEST);
         }
 
-        if(!groupCode.startsWith(EesUserResponse.EES_GROUP_PREFIX)){
-            groupCode = EesUserResponse.EES_GROUP_PREFIX +  groupCode;
+        if (!groupCode.startsWith(EesUserResponse.EES_GROUP_PREFIX)) {
+            groupCode = EesUserResponse.EES_GROUP_PREFIX + groupCode;
         }
         Optional<EesGroup> group = eesGroupRepository.findByCode(groupCode);
         if (group.isEmpty()) {
@@ -115,15 +118,15 @@ public class EesGroupService {
         }
     }
 
-    public ResponseEntity<Object> deleteGroup(String groupCode){
+    public ResponseEntity<Object> deleteGroup(String groupCode) {
         if (!groupCode.startsWith(EesUserResponse.EES_GROUP_PREFIX)) {
             groupCode = EesUserResponse.EES_GROUP_PREFIX + groupCode;
         }
 
         Optional<EesGroup> group = eesGroupRepository.findByCode(groupCode);
-        if(group.isEmpty()){
+        if (group.isEmpty()) {
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_GROUP_NOT_FOUND), HttpStatus.NOT_FOUND);
-        }else{
+        } else {
             eesGroupRepository.delete(group.get());
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_GROUP_DELETED), HttpStatus.OK);
         }

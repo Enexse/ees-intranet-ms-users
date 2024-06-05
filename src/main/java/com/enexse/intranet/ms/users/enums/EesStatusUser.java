@@ -5,12 +5,10 @@ public enum EesStatusUser {
     ACTIVE("active"),
     DISABLED("disabled"),
     PENDING("pending"),
-    ARCHIVED ("archived") ,
+    ARCHIVED("archived"),
     NEVER_CONNECTED("never_connected"),
-    NOT_ASSIGNED("EES_NOT_ASSIGNED") ,
-
-    CERTIFIED("EES_CERTFIED") ;
-
+    NOT_ASSIGNED("EES_NOT_ASSIGNED"),
+    CERTIFIED("EES_CERTFIED");
 
     private String status;
 

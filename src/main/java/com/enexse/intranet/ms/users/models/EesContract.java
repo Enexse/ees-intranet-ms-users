@@ -1,6 +1,6 @@
 package com.enexse.intranet.ms.users.models;
 
-import com.enexse.intranet.ms.users.enums.EesStatusCustomer;
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class EesContract {
     private String contractCode;
     private String contractTitle;
     private String contractDescription;
-    private EesStatusCustomer status;
+    private EesStatus status;
     private String createdAt;
     private String updatedAt;
     private EesUser createdBy;

@@ -19,5 +19,7 @@ public class EesUpdateUserProfile {
     private String zipCode;
     private String phoneNumber;
     private String prefixPhone;
+    private String dateOfBirth;
+    private String nationality;
 
 }

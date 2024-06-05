@@ -34,19 +34,19 @@ public class EesRolesController {
         return eesRoleService.insertRole(request);
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_All_ROLES)
     public List<EesUserRole> eesGetAllRoles() {
         return eesRoleService.getAllRoles();
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_ROLE_BY_CODE_ROLE)
     public EesUserRole eesGetRoleByCodeRole(@RequestParam String roleCode) {
         return eesRoleService.getRoleByCode(roleCode);
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_ROLE_BY_TITLE)
     public EesUserRole eesGetRoleByTitle(@RequestParam String roleTitle) {
         return eesRoleService.getRoleByTitle(roleTitle);
@@ -64,22 +64,19 @@ public class EesRolesController {
         return eesRoleService.deleteRoleByCode(roleCode);
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_PERMISSIONS_BY_CODE_ROLE)
     public ResponseEntity<Object> getListOfPermissionsByRoleCode(@PathVariable String roleCode) {
         return eesRoleService.getListOfPermissionsByRoleCode(roleCode);
-
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_USERS_BY_ROLE)
     public ResponseEntity<Object> getUsersByRole(@PathVariable String roleCode) {
         return eesRoleService.usersByRole(roleCode);
-
     }
 
-
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_All_KEYCLOACK_ROLES)
     public List<String> getRoles() {
         // Appeler le service pour obtenir les rôles commençant par "EES-"

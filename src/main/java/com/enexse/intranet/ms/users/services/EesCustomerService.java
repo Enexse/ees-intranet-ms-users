@@ -1,7 +1,7 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
-import com.enexse.intranet.ms.users.enums.EesStatusCustomer;
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import com.enexse.intranet.ms.users.models.EesCustomer;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.models.partials.EesReferentCustomer;
@@ -17,9 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,7 +30,6 @@ public class EesCustomerService {
     private EesCustomerRepository eesCustomerRepository;
     private EesReferentCustomerRepository eesReferentCustomerRepository;
     private EesUserRepository eesUserRepository;
-
 
     public ResponseEntity<Object> insertCustomer(EesCustomerRequest request) {
 
@@ -62,7 +63,7 @@ public class EesCustomerService {
                     .customerCode(request.getCustomerCode().toUpperCase(Locale.ROOT))
                     .customerTitle(request.getCustomerTitle())
                     .sectorField(request.getSectorField())
-                    .status(EesStatusCustomer.ACTIVE)
+                    .status(EesStatus.ACTIVE)
                     .comments(request.getComments())
                     .referent(referent)
                     .landline(request.getLandline())
@@ -79,7 +80,8 @@ public class EesCustomerService {
     }
 
     public List<EesCustomer> getAllCustomers() {
-        List<EesCustomer> customers = eesCustomerRepository.findAll();
+        List<EesCustomer> customers = eesCustomerRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesCustomer::getCreatedAt).reversed()).collect(Collectors.toList());
         return customers;
     }
 
@@ -157,7 +159,7 @@ public class EesCustomerService {
         if (customer == null) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_CUSTOMER_NOT_FOUND, customerCode)), HttpStatus.NOT_FOUND);
         } else {
-            customer.setStatus(status.compareToIgnoreCase(EesStatusCustomer.ACTIVE.getStatus()) == 0 ? EesStatusCustomer.DISABLED : EesStatusCustomer.ACTIVE);
+            customer.setStatus(status.compareToIgnoreCase(EesStatus.ACTIVE.getStatus()) == 0 ? EesStatus.DISABLED : EesStatus.ACTIVE);
             customer.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
             eesCustomerRepository.save(customer);
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_CUSTOMER_UPDATED_STATUS), HttpStatus.OK);

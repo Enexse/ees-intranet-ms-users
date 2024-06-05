@@ -4,6 +4,7 @@ package com.enexse.intranet.ms.users.services;
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
 import com.enexse.intranet.ms.users.models.EesCaseNumber;
 import com.enexse.intranet.ms.users.models.EesCustomer;
+import com.enexse.intranet.ms.users.models.EesMessageAlert;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.payload.request.EesCaseNumberRequest;
 import com.enexse.intranet.ms.users.payload.response.EesGenericResponse;
@@ -17,9 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -68,7 +71,8 @@ public class EesCaseNumberService {
     }
 
     public List<EesCaseNumber> getAllCaseNumbers() {
-        List<EesCaseNumber> caseNumbers = eesCaseNumberRepository.findAll();
+        List<EesCaseNumber> caseNumbers = eesCaseNumberRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesCaseNumber::getCreatedAt).reversed()).collect(Collectors.toList());
         return caseNumbers;
     }
 

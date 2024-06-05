@@ -1,6 +1,6 @@
 package com.enexse.intranet.ms.users.models;
 
-import com.enexse.intranet.ms.users.enums.EesStatusCustomer;
+import com.enexse.intranet.ms.users.enums.EesStatus;
 import com.enexse.intranet.ms.users.models.partials.EesReferentCustomer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ public class EesCustomer {
     private String customerCode;
     private String customerTitle;
     private String sectorField;
-    private EesStatusCustomer status;
+    private EesStatus status;
 
     @DBRef
     private EesReferentCustomer referent;

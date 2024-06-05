@@ -4,7 +4,6 @@ import com.enexse.intranet.ms.users.constants.EesUserConstants;
 import com.enexse.intranet.ms.users.constants.EesUserEndpoints;
 import com.enexse.intranet.ms.users.models.EesMessage;
 import com.enexse.intranet.ms.users.models.EesMessageType;
-import com.enexse.intranet.ms.users.payload.request.EesEntityRequest;
 import com.enexse.intranet.ms.users.payload.request.EesMessageRequest;
 import com.enexse.intranet.ms.users.payload.request.EesMessageTypeRequest;
 import com.enexse.intranet.ms.users.services.EesMessageService;
@@ -25,7 +24,7 @@ public class EesMessageController {
 
     private EesMessageService messageService;
 
-    @RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES)
+    //@RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES) -> Needs in web without connected
     @PostMapping(EesUserEndpoints.EES_INSERT_MESSAGE)
     public ResponseEntity<Object> eesInsertMessage(@Valid @RequestBody EesMessageRequest messageRequest) {
         return messageService.insertMessage(messageRequest);
@@ -43,7 +42,7 @@ public class EesMessageController {
         return messageService.insertMessageType(request);
     }
 
-    @RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES)
+    //@RolesAllowed(EesUserConstants.EES_DEFAULT_ROLES) -> Needs in web without connected
     @GetMapping(EesUserEndpoints.EES_GET_All_MESSAGE_TYPES)
     public List<EesMessageType> eesGetAllMessageTypes() {
         return messageService.getAllMessageTypes();
@@ -59,5 +58,12 @@ public class EesMessageController {
     @DeleteMapping(EesUserEndpoints.EES_DELETE_MESSAGE_TYPE)
     public ResponseEntity<Object> eesDeleteMessageTypeByCode(@PathVariable String code) {
         return messageService.deleteMessageTypeByCode(code);
+    }
+
+    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @PutMapping(EesUserEndpoints.EES_ACTIVATE_MESSAGE_TYPE_BY_CODE)
+    public ResponseEntity<Object> eesChangeStatusMessageType(@PathVariable String code,
+                                                             @RequestParam(value = "status", required = true) String status) {
+        return messageService.changeStatusMessageType(code, status);
     }
 }

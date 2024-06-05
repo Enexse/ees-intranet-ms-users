@@ -57,10 +57,10 @@ public class EesMailService {
                 model.put("email", user.get().getPersonalEmail());
                 model.put("userId", user.get().getUserId().toUpperCase());
                 model.put("enexseEmail", user.get().getEnexseEmail());
-                model.put("firstPassword", user.get().getFirstName() + "@1234");
+                model.put("firstPassword", password);
 
                 // recuperate the file from cloudinary
-                EesCloudinaryDoc booklet = cloudinaryRepository.findByEesUploadType(EesUserConstants.EES_CLOUDINARY_WELCOMEL_BOOKLET_TYPE);
+                EesCloudinaryDoc booklet = cloudinaryRepository.findByEesUploadType(EesUserConstants.EES_CLOUDINARY_WELCOME_BOOKLET_TYPE);
                 String bookletUrl = booklet.getSecureUrl();
                 byte[] bookletData = new URL(bookletUrl).openStream().readAllBytes();
                 ByteArrayResource bookletResource = new ByteArrayResource(bookletData) {
@@ -131,11 +131,11 @@ public class EesMailService {
                 List<String> ccEmails = new ArrayList<>();
 
                 for (EesUser collaborator : collaborators) {
-                    String email = collaborator.getPersonalEmail();
+                    String email = collaborator.getEnexseEmail();
                     toEmails.add(email);
 
                     for (EesUser otherCollaborator : collaborators) {
-                        String otherEmail = otherCollaborator.getPersonalEmail();
+                        String otherEmail = otherCollaborator.getEnexseEmail();
                         if (!email.equals(otherEmail)) {
                             ccEmails.add(otherEmail);
                         }
@@ -197,7 +197,7 @@ public class EesMailService {
 
 
     public Optional<EesUser> returnUser(String email) {
-        Optional<EesUser> eesUser = eesUserRepository.findByPersonalEmail(email);
+        Optional<EesUser> eesUser = eesUserRepository.findByEnexseEmail(email);
         return eesUser;
     }
 
@@ -232,10 +232,10 @@ public class EesMailService {
         try {
             if (user.isPresent()) {
                 model.put("name", user.get().getLastName().toUpperCase());
-                model.put("email", user.get().getPersonalEmail());
+                model.put("email", email);
                 model.put("userId", user.get().getUserId().toUpperCase());
                 model.put("link", link);
-                response = eesMailUtil.eesSendMail(user.get().getPersonalEmail(), model, verifyType);
+                response = eesMailUtil.eesSendMail(email, model, verifyType);
             }
             return new ResponseEntity<Object>(response, HttpStatus.OK);
         } catch (Exception ex) {
@@ -265,7 +265,7 @@ public class EesMailService {
                 model.put("note", request.getNote());
                 model.put("societyEmail", enexseEmail);
 
-                response = eesMailUtil.eesSendMail(user.get().getPersonalEmail(), model, verifyType);
+                response = eesMailUtil.eesSendMail(user.get().getEnexseEmail(), model, verifyType);
             }
             return new ResponseEntity<Object>(response, HttpStatus.OK);
         } catch (Exception ex) {

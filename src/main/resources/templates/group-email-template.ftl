@@ -14,41 +14,42 @@
     <tr>
         <td align="center" valign="center" style="text-align:center; padding: 40px">
             <a href="http://www.enexse.com/" rel="noopener" target="_blank">
-                <img src="https://enexse-demo.netlify.app/assets/images/EES-logoWeb-primary.png" alt="Logo Enexse"
-                     style="width: 50%"/>
+                <img src="https://dct-enexse.onrender.com/assets/images/EES-logoWeb-primary.png" alt="Logo Enexse"
+                />
             </a>
         </td>
     </tr>
     <tr>
-        <td align="left" valign="center">
-            <div style="text-align:left; margin: 0 20px; padding: 40px; background-color:#ffffff; border-radius: 6px">
-                <!--begin:Email content-->
-                <div style="padding-bottom: 30px; font-size: 15px;">
-                    <strong>Bonjour (${groupName})</strong>
-
-                </div>
-                <div style="padding-bottom: 30px; font-size: 15px;">
-                    ${personalizedMessage}
-                </div>
-                <!--end:Email content-->
-                 <div style="padding-bottom: 10px">Kind regards,
-                                        <br>${sentBy}.
-                                            <tr>
-                                                <td align="center" valign="center"
-                                                    style="font-size: 13px; text-align:center;padding: 20px; color: #6d6e7c;">
-                                                    <p>11, Rue Marius Tercé – Parc “Aerotec” Bat. A, 31300, TOULOUSE.</p>
-                                                    <p>Copyright ©
-                                                        <a href="http://www.enexse.com/" rel="noopener" target="_blank">En.Ex.Se</a>.
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        </tbody></div>
-                                </div>
-            </div>
+    <td align="left" valign="center">
+    <div style="text-align:left; margin: 0 20px; padding: 40px; background-color:#ffffff; border-radius: 6px">
+    <!--begin:Email content-->
+    <div style="padding-bottom: 30px; font-size: 15px;">
+        <strong>Bonjour (${groupName})</strong>
+    </div>
+    <div style="padding-bottom: 30px; font-size: 15px;">
+        ${personalizedMessage}
+    </div>
+    <!--end:Email content-->
+    <div style="padding-bottom: 10px">
+    Kind regards,
+    <br>${sentBy}.
+    <tr>
+        <td align="center" valign="center"
+            style="font-size: 13px; text-align:center;padding: 20px; color: #6d6e7c;">
+            <p>11, Rue Marius Tercé – Parc “Aerotec” Bat. A, 31300, TOULOUSE.</p>
+            <p>Copyright ©
+                <a href="http://www.enexse.com/" rel="noopener" target="_blank">En.Ex.Se</a>.
+            </p>
         </td>
     </tr>
     </tbody>
-    </table>
 </div>
-</body>
-</html>
+</div>
+</div>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+        </body>
+        </html>

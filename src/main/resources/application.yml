@@ -3,7 +3,7 @@ server:
 spring:
   profiles:
     active:
-      - prod
+      - ${ENVIRONMENT}
   main:
     allow-bean-definition-overriding: true
   servlet:
@@ -21,7 +21,7 @@ spring:
     host: smtps.aruba.it
     port: 587
     username: software.engineering@enexse.com
-    password: Software@1234
+    password: SoftEngineering@2024*
     protocol: smtp
     default-encoding: UTF-8
     application:

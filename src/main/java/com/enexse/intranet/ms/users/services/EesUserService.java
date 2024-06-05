@@ -9,6 +9,7 @@ import com.enexse.intranet.ms.users.enums.EesStatusRequest;
 import com.enexse.intranet.ms.users.enums.EesStatusUser;
 import com.enexse.intranet.ms.users.exceptions.ObjectFoundException;
 import com.enexse.intranet.ms.users.models.*;
+import com.enexse.intranet.ms.users.models.partials.EesCareerComment;
 import com.enexse.intranet.ms.users.models.partials.EesUserInfo;
 import com.enexse.intranet.ms.users.models.timesheet.EesTimeSheetActivity;
 import com.enexse.intranet.ms.users.models.timesheet.EesTimeSheetContractHours;
@@ -19,13 +20,16 @@ import com.enexse.intranet.ms.users.payload.request.timesheet.EesUserTimesheetRe
 import com.enexse.intranet.ms.users.payload.response.EesGenericResponse;
 import com.enexse.intranet.ms.users.payload.response.EesMessageResponse;
 import com.enexse.intranet.ms.users.repositories.*;
+import com.enexse.intranet.ms.users.repositories.partials.EesCareerCommentRepository;
 import com.enexse.intranet.ms.users.repositories.partials.EesUserInfoRepository;
 import com.enexse.intranet.ms.users.repositories.timesheet.EesTimeSheetActivityRepository;
 import com.enexse.intranet.ms.users.repositories.timesheet.EesTimeSheetContractHoursRepository;
 import com.enexse.intranet.ms.users.repositories.timesheet.EesTimeSheetWorkPlaceRepository;
 import com.enexse.intranet.ms.users.utils.EesCommonUtil;
 import com.enexse.intranet.ms.users.utils.ImageUtil;
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +41,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotAuthorizedException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EesUserService {
@@ -81,19 +88,20 @@ public class EesUserService {
     private EesUserInfoRepository eesUserInfoRepository;
     @Autowired
     private EesUserProfessionRepository eesUserProfessionRepository;
-
     @Autowired
     private EesMissionRepository eesMissionRepository;
     @Autowired
     private keycloakProvider kcProvider;
     @Autowired
     private PasswordEncoder passwordEncoder;
-
     @Autowired
     private EesFormationRepository eesFormationRepository;
-
     @Autowired
     private EesWorkplaceService eesWorkplaceService;
+    @Autowired
+    private EesFrontEndLink eesFrontEndLink;
+    @Autowired
+    private EesCareerCommentRepository eesCareerCommentRepository;
 
     public EesUserService(EesUserRepository userRepository) {
         this.eesUserRepository = userRepository;
@@ -163,9 +171,6 @@ public class EesUserService {
         Optional<EesUser> eesUser = eesUserRepository.findById(id);
         if (eesUser.isPresent()) {
             eesUser.get().setLastLogin(date);
-//            if(eesUser.get().getStatus().compareTo(EesStatusUser.ACTIVE) == 0){
-//                eesUser.get().setStatus(EesStatusUser.PENDING);
-//            }
             eesUserRepository.save(eesUser.get());
             return ResponseEntity.ok(eesUser.get());
         } else {
@@ -173,20 +178,23 @@ public class EesUserService {
         }
     }
 
-    public ResponseEntity<Object> updatePassword(String userId, String newPassword, String idlink) {
+    public ResponseEntity<Object> updatePassword(String userId, String newPassword, String idling) {
         EesUser user;
         EesUser updatedUser;
         if (getUserById(userId).isEmpty()) {
             throw new ObjectFoundException(String.format(EesUserResponse.EES_USER_DOES_NOT_EXISTS));
         } else {
-            //update password in database
+            // Update password in Database MongoDB
             user = getUserById(userId).get();
             user.setPassword(passwordEncoder.encode(newPassword));
             updatedUser = eesUserRepository.save(user);
-            eesVerifyIdentityRepository.deleteById(idlink);
+            eesVerifyIdentityRepository.deleteById(idling);
+
+            // Update password in Keycloak
+            UsersResource usersResource = kcProvider.getInstance().realm(realm).users();
+            usersResource.get(user.getKeycloakId()).resetPassword(createPasswordCredentials(newPassword));
         }
         return ResponseEntity.ok(updatedUser);
-
     }
 
     public Page<EesUser> getLastCollaboratorsPaginated(int page, int pageSize) {
@@ -214,7 +222,8 @@ public class EesUserService {
 
     public ResponseEntity<Object> getAllCollaborators() {
         List<EesUser> list = null;
-        list = eesUserRepository.findAll();
+        list = eesUserRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesUser::getCreatedAt).reversed()).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 
@@ -239,13 +248,13 @@ public class EesUserService {
             // Check file format
             String originalFilename = avatar.getOriginalFilename();
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            List<String> allowedExtensions = EesUserConstants.EES_ALLOWED_EXTENTIONS;
+            List<String> allowedExtensions = EesUserConstants.EES_ALLOWED_EXTENSIONS;
             if (!allowedExtensions.contains(fileExtension.toLowerCase())) {
-                StringBuilder extentions = new StringBuilder();
+                StringBuilder extensions = new StringBuilder();
                 for (String ex : allowedExtensions) {
-                    extentions.append(ex).append(" ");
+                    extensions.append(ex).append(" ");
                 }
-                return new ResponseEntity<>("Invalid avatar format. Allowed formats: " + extentions, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Invalid avatar format. Allowed formats: " + extensions, HttpStatus.BAD_REQUEST);
             }
 
             EesUserInfo userInfo = user.getEesUserInfo();
@@ -278,25 +287,26 @@ public class EesUserService {
         }
     }
 
-    public ResponseEntity<Object> changePassword(String userId, String currentPassword, EesChangePasswordRequest request) throws Exception {
+    public ResponseEntity<Object> changePassword(String userId, String currentPassword, EesChangePasswordRequest request) {
         EesUser user;
         EesUser updatedUser;
         if (getUserById(userId).isEmpty()) {
             throw new ObjectFoundException(String.format(EesUserResponse.EES_USER_DOES_NOT_EXISTS));
         } else {
             user = getUserById(userId).get();
-            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-                throw new Exception("Current password is incorrect");
+            if (!validateCurrentPassword(user.getEnexseEmail(), currentPassword)) {
+                return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_USER_ERROR_PASSWORD_NOT_MATCH), HttpStatus.BAD_REQUEST);
             }
+//            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+//                return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_USER_ERROR_PASSWORD_NOT_MATCH), HttpStatus.BAD_REQUEST);
+//            }
             // Update password in keycloak
             UsersResource usersResource = kcProvider.getInstance().realm(realm).users();
             usersResource.get(user.getKeycloakId()).resetPassword(createPasswordCredentials(request.getNewPassword()));
 
             // Update password in the database
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-            if (user.getStatus().compareTo(EesStatusUser.DISABLED) == 0) {
-                user.setStatus(EesStatusUser.ACTIVE);
-            }
+            user.setStatus(user.getStatus().compareTo(EesStatusUser.DISABLED) == 0 ? EesStatusUser.ACTIVE : user.getStatus());
             updatedUser = eesUserRepository.save(user);
 
             // Update field passwordChangedAt in EesUserInfo
@@ -306,6 +316,18 @@ public class EesUserService {
             eesUserInfoRepository.save(userInfo);
         }
         return ResponseEntity.ok(updatedUser);
+    }
+
+    private boolean validateCurrentPassword(String email, String currentPassword) {
+        try {
+            Keycloak keycloak = kcProvider.newKeycloakBuilderWithPasswordCredentials(email, currentPassword).build();
+            AccessTokenResponse accessTokenResponse =  keycloak.tokenManager().getAccessToken();
+            return accessTokenResponse != null ? true : false;
+        } catch (NotAuthorizedException ex) {
+            return false;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     public ResponseEntity<Object> changePersonalEmail(String userId, EesUserEmailRequest request) throws Exception {
@@ -334,88 +356,91 @@ public class EesUserService {
     }
 
     public ResponseEntity<Object> insertUser(com.enexse.intranet.ms.users.payload.request.EesUserRequest request) {
-        EesUserAddress userAddress = new EesUserAddress();
-        Optional<EesUser> optionalEesUser = eesUserRepository.findByPersonalEmail(request.getPersonalEmail());
 
-        userAddress.setCountry(request.getUserAddress().getCountry());
-        userAddress.setState(request.getUserAddress().getState());
-        userAddress.setAddressLine(request.getUserAddress().getAddressLine());
-        userAddress.setZipCode(request.getUserAddress().getZipCode());
+        if (verifyPersonalEmail(request.getPersonalEmail())) {
+            EesUserAddress userAddress = new EesUserAddress();
 
-        EesUserContact userContact = new EesUserContact();
-        userContact.setPrefixPhone(request.getUserContact().getPrefixPhone());
-        userContact.setPhoneNumber(request.getUserContact().getPhoneNumber());
+            userAddress.setCountry(request.getUserAddress().getCountry());
+            userAddress.setState(request.getUserAddress().getState());
+            userAddress.setAddressLine(request.getUserAddress().getAddressLine());
+            userAddress.setZipCode(request.getUserAddress().getZipCode());
 
-        EesUserInfo userInfo = new EesUserInfo()
-                .builder()
-                .defaultAvatar(EesCommonUtil.generateDefaultAvatar())
-                .build();
+            EesUserContact userContact = new EesUserContact();
+            userContact.setPrefixPhone(request.getUserContact().getPrefixPhone());
+            userContact.setPhoneNumber(request.getUserContact().getPhoneNumber());
 
-        EesUserEntity entity = eesUserEntityRepository.findByEntityCode(request.getEntityCode());
-        EesUserDepartment department = eesUserDepartmentRepository.findByCompanyDepartmentCode(request.getDepartmentCode());
-        int monthNumber = getMonthNumberFromString(EesCommonUtil.generateCurrentDateUtil());
-        if (department.getMap().containsKey(monthNumber)) {
-            int value = department.getMap().get(monthNumber);
-            department.getMap().put(monthNumber, value + 1);
-        } else {
-            department.getMap().put(monthNumber, 1);
-        }
-        EesUserProfession profession = eesUserProfessionRepository.findByProfessionCode(request.getProfessionCode());
+            EesUserInfo userInfo = new EesUserInfo()
+                    .builder()
+                    .defaultAvatar(EesCommonUtil.generateDefaultAvatar())
+                    .build();
 
-        EesUser user = new EesUser()
-                .builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .pseudo(request.getLastName().split(" ")[0].toLowerCase(Locale.ROOT) + "." + request.getFirstName().split(" ")[0].toLowerCase(Locale.ROOT))
-                .personalEmail(request.getPersonalEmail())
-                .status(EesStatusUser.NEVER_CONNECTED)
-                .gender(request.getGender())
-                .notes(request.getNotes())
-                .lastLogin(request.getLastLogin())
-                .createdAt(EesCommonUtil.generateCurrentDateUtil())
-                .updatedAt(EesCommonUtil.generateCurrentDateUtil())
-                .deletedAt(request.getDeletedAt())
-                .userAddress(userAddress)
-                .userContact(userContact)
-                .eesEntity(entity)
-                .entityCode(request.getEntityCode())
-                .eesDepartment(department)
-                .departmentCode(request.getDepartmentCode())
-                .eesProfession(profession)
-                .professionCode(request.getProfessionCode())
-                .eesUserInfo(userInfo)
-                .experience(0)
-                .build();
+            EesUserEntity entity = eesUserEntityRepository.findByEntityCode(request.getEntityCode());
+            EesUserDepartment department = eesUserDepartmentRepository.findByCompanyDepartmentCode(request.getDepartmentCode());
+            int monthNumber = getMonthNumberFromString(EesCommonUtil.generateCurrentDateUtil());
+            if (department.getMap().containsKey(monthNumber)) {
+                int value = department.getMap().get(monthNumber);
+                department.getMap().put(monthNumber, value + 1);
+            } else {
+                department.getMap().put(monthNumber, 1);
+            }
+            EesUserProfession profession = eesUserProfessionRepository.findByProfessionCode(request.getProfessionCode());
 
-        com.enexse.intranet.ms.users.models.EesUserRequest userRequest = new com.enexse.intranet.ms.users.models.EesUserRequest();
-        userRequest.setRequestCode("EES-DMD-INV");
-        userRequest.setRequestTitle("Activation of the ENEXSE email address");
-        userRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
-        userRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
-        eesRequestRepository.save(userRequest);
+            EesUser user = new EesUser()
+                    .builder()
+                    .responsible(request.getResponsible())
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .pseudo(request.getLastName().split(" ")[0].toLowerCase(Locale.ROOT) + "." + request.getFirstName().split(" ")[0].toLowerCase(Locale.ROOT))
+                    .nationality(request.getNationality())
+                    .dateOfBirth(request.getDateOfBirth())
+                    .personalEmail(request.getPersonalEmail())
+                    .status(EesStatusUser.NEVER_CONNECTED)
+                    .gender(request.getGender())
+                    .notes(request.getNotes())
+                    .lastLogin(request.getLastLogin())
+                    .createdAt(EesCommonUtil.generateCurrentDateUtil())
+                    .updatedAt(EesCommonUtil.generateCurrentDateUtil())
+                    .deletedAt(request.getDeletedAt())
+                    .userAddress(userAddress)
+                    .userContact(userContact)
+                    .eesEntity(entity)
+                    .entityCode(request.getEntityCode())
+                    .eesDepartment(department)
+                    .departmentCode(request.getDepartmentCode())
+                    .eesProfession(profession)
+                    .professionCode(request.getProfessionCode())
+                    .eesUserInfo(userInfo)
+                    .experience(0)
+                    .build();
 
-        EesUserSubRequest userSubRequest = new EesUserSubRequest();
-        userSubRequest.setSubRequestCode("EES-DMD-INV-COL");
-        userSubRequest.setDescription("Demande de création de l'email " + user.getPersonalEmail() + " au format enexse");
-        userSubRequest.setEesUserRequest(userRequest);
-        userSubRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
-        userSubRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
-        eesSubRequestRepository.save(userSubRequest);
+            com.enexse.intranet.ms.users.models.EesUserRequest userRequest = new com.enexse.intranet.ms.users.models.EesUserRequest();
+            userRequest.setRequestCode(EesUserConstants.EES_REQUEST_CODE_INVITATION);
+            userRequest.setRequestTitle(EesUserConstants.EES_REQUEST_TITLE_INVITATION);
+            userRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
+            userRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
+            eesRequestRepository.save(userRequest);
 
-        EesUserCreateRequest createRequest = new EesUserCreateRequest();
+            EesUserSubRequest userSubRequest = new EesUserSubRequest();
+            userSubRequest.setSubRequestCode(EesUserConstants.EES_SUB_REQUEST_CODE_INVITATION);
+            userSubRequest.setDescription(String.format(EesUserConstants.EES_SUB_REQUEST_DESCRIPTION_INVITATION, user.getPersonalEmail()));
+            userSubRequest.setEesUserRequest(userRequest);
+            userSubRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
+            userSubRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
+            eesSubRequestRepository.save(userSubRequest);
 
-        createRequest.setRequest(userRequest);
-        createRequest.setSubRequest(userSubRequest);
-        createRequest.setStatus(EesStatusRequest.PENDING);
-        createRequest.setPersonalEmail(user.getPersonalEmail());
-        createRequest.setEnexseEmail(user.getEnexseEmail());
-        createRequest.setPassword(user.getPassword());
-        createRequest.setUser(user);
-        createRequest.setType("Automatic");
-        createRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
-        createRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
+            EesUserCreateRequest createRequest = new EesUserCreateRequest();
 
-        if (verifyPersonalEmail(user.getPersonalEmail())) {
+            createRequest.setRequest(userRequest);
+            createRequest.setSubRequest(userSubRequest);
+            createRequest.setStatus(EesStatusRequest.PENDING);
+            createRequest.setPersonalEmail(user.getPersonalEmail());
+            createRequest.setEnexseEmail(user.getEnexseEmail());
+            createRequest.setPassword(user.getPassword());
+            createRequest.setUser(user);
+            createRequest.setType(EesUserConstants.EES_REQUEST_AUTOMATIC);
+            createRequest.setCreatedAt(EesCommonUtil.generateCurrentDateUtil());
+            createRequest.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
+
             eesUserAddressRepository.save(user.getUserAddress());
             eesUserContactRepository.save(user.getUserContact());
             eesUserInfoRepository.save(userInfo);
@@ -424,16 +449,16 @@ public class EesUserService {
             eesCreateRequestRepository.save(createRequest);
             eesRequestRepository.delete(userRequest);
             eesSubRequestRepository.delete(userSubRequest);
+
+            // Send invitation email to user
+            /*String tmpPassword = EesCommonUtil.generateFirstPassword(request.getLastName());*/
+
+            System.out.println(user);
+            //return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_USER_CREATED), HttpStatus.CREATED);
+            return ResponseEntity.ok(user);
         } else {
             throw new ObjectFoundException(String.format(EesUserResponse.EES_USER_ALREADY_EXISTS, request.getPersonalEmail()));
         }
-
-        // Send invitation email to user
-        /*String tmpPassword = EesCommonUtil.generateFirstPassword(request.getLastName());*/
-
-        System.out.println(user);
-        //return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_USER_CREATED), HttpStatus.CREATED);
-        return ResponseEntity.ok(user);
     }
 
     public ResponseEntity<Object> certificateEmailUser(EesUserEmailRequest request) {
@@ -448,9 +473,9 @@ public class EesUserService {
                     .link(UUID.randomUUID().toString())
                     .build();
             user.get().setStatus(EesStatusUser.CERTIFIED);
-            ;
+
             eesVerifyIdentityRepository.save(verifyIdentity);
-            String link = EesFrontEndLink.EES_LINK_CERTIFIED_EMAIL + verifyIdentity.getLink() + "&expirationDate=" + verifyIdentity.getExpiry_date() + "&verifyType="
+            String link = eesFrontEndLink.getEesLinkCertifiedEmail() + verifyIdentity.getLink() + "&expirationDate=" + verifyIdentity.getExpiry_date() + "&verifyType="
                     + verifyIdentity.getVerifyType();
             ResponseEntity<Object> response = eesMailService.certificationUserEmail(request.getEmail(), link, EesUserConstants.EES_VERIFY_TYPE_EMAIL_VERIFICATION);
             if (response.getStatusCode() != HttpStatus.INTERNAL_SERVER_ERROR) {
@@ -462,7 +487,7 @@ public class EesUserService {
         }
     }
 
-    public ResponseEntity<Object> updateUserProfil(String userId, EesUpdateUserProfile request) {
+    public ResponseEntity<Object> updateUserProfile(String userId, EesUpdateUserProfile request) {
         Optional<EesUser> user = eesUserRepository.findByUserId(userId);
         EesUserAddress address = user.get().getUserAddress();
         EesUserContact contact = user.get().getUserContact();
@@ -470,6 +495,8 @@ public class EesUserService {
             user.get().setFirstName(request.getFirstName());
             user.get().setLastName(request.getLastName());
             user.get().setPseudo(request.getLastName().split(" ")[0].toLowerCase(Locale.ROOT) + "." + request.getFirstName().split(" ")[0].toLowerCase(Locale.ROOT));
+            user.get().setDateOfBirth(request.getDateOfBirth());
+            user.get().setNationality(request.getNationality());
             address.setCountry(request.getCountry());
             address.setState(request.getState());
             address.setAddressLine(request.getAddressLine());
@@ -656,29 +683,8 @@ public class EesUserService {
             if (request.getDepartmentCode() != null) {
                 EesUserDepartment department = eesUserDepartmentRepository.findByCompanyDepartmentCode(request.getDepartmentCode());
 
-                //add a check whether user have already a department or no, if yes the number of users assigned to this department should decrease by one.
-//                EesUserDepartment dep = user.get().getEesDepartment();
-//                if (dep != null) {
-//                    int i = 1;
-//                    while (i < 13) {
-//                        if (dep.getMap().containsKey(i)) {
-//                            int value = department.getMap().get(i);
-//                            department.getMap().put(i, value - 1);
-//                            i += 12;
-//                        }
-//                        i++;
-//                    }
-//                }
-
                 user.get().setEesDepartment(department);
                 user.get().setDepartmentCode(request.getDepartmentCode());
-//                int monthNumber = getMonthNumberFromString(EesCommonUtil.generateCurrentDateUtil());
-//                if (department.getMap().containsKey(monthNumber)) {
-//                    int value = department.getMap().get(monthNumber);
-//                    department.getMap().put(monthNumber, value + 1);
-//                } else {
-//                    department.getMap().put(monthNumber, 1);
-//                }
                 eesUserDepartmentRepository.save(department);
             }
             if (request.getProfessionCode() != null) {
@@ -786,7 +792,6 @@ public class EesUserService {
         } else {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
         }
-
     }
 
     public ResponseEntity<Object> getDepartment(String userId) {
@@ -797,7 +802,6 @@ public class EesUserService {
         } else {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
         }
-
     }
 
     public ResponseEntity<Object> getRole(String userId) {
@@ -808,7 +812,6 @@ public class EesUserService {
         } else {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
         }
-
     }
 
     public ResponseEntity<Object> getProfession(String userId) {
@@ -819,16 +822,12 @@ public class EesUserService {
         } else {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
         }
-
     }
 
     public List<EesUser> getLastUsers() {
-
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(0, 3, sort);
-
         return eesUserRepository.findLastThreeUsersAfterDate(EesCommonUtil.generateCurrentDateUtil(), pageable);
-
     }
 
     public ResponseEntity<Object> addMissionToCollaborator(String userId, EesMissionRequest request) {
@@ -906,7 +905,6 @@ public class EesUserService {
         if (user.isPresent()) {
             List<EesMission> missions = user.get().getMissions();
 
-
             Optional<EesMission> mission = missions.stream()
                     .filter(m -> m.getMissionId().equals(missionId))
                     .findFirst();
@@ -920,8 +918,6 @@ public class EesUserService {
                 missionToUpdate.setStartDate(request.getStartDate());
                 missionToUpdate.setEndDate(request.getEndDate());
                 missionToUpdate.setCustomer(client);
-
-
                 EesMission updatedMission = eesMissionRepository.save(missionToUpdate);
 
                 return ResponseEntity.ok(updatedMission);
@@ -960,7 +956,6 @@ public class EesUserService {
             return new ResponseEntity<>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
         }
     }
-
 
     public ResponseEntity<Object> addFormationToCollaborator(String userId, EesFormationRequest request) {
         Optional<EesUser> user = eesUserRepository.findByUserId(userId);
@@ -1026,5 +1021,63 @@ public class EesUserService {
         }
     }
 
+    public ResponseEntity<Object> resendInvitationUser(EesCreateUserRequest request, String personalEmail) {
+        String password = request.getFirstName() + "@1234";
+        // Send email to collaborator
+        ResponseEntity<Object> emailResponse = eesMailService.invitationUserEmail(personalEmail, password, EesUserConstants.EES_VERIFY_TYPE_INVITATION_USER);
+        System.out.println(emailResponse.getStatusCode());
+        if (emailResponse.getStatusCode() == HttpStatus.OK) {
+            // Email successfully sent to collaborator
+            return ResponseEntity.ok(emailResponse.getBody());
+        }
+        return new ResponseEntity<Object>(new EesMessageResponse(
+                EesUserResponse.EES_USER_ERROR_SEND_EMAIL + personalEmail),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
+    public ResponseEntity<Object> updateCollaboratorStatus(String userId, String status) {
+        Optional<EesUser> user = eesUserRepository.findByUserId(userId);
+        if (user.isPresent()) {
+            user.get().setStatus(EesStatusUser.valueOf(status));
+            eesUserRepository.save(user.get());
+        } else {
+            return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(user.get());
+    }
+
+    public ResponseEntity<Object> addCommentCareer(String userId, String careerId, String comment) {
+        Optional<EesUser> user = eesUserRepository.findByUserId(userId);
+        if (user.isPresent()) {
+            List<EesMission> missions = user.get().getMissions();
+
+            Optional<EesMission> mission = missions.stream()
+                    .filter(m -> m.getMissionId().equals(careerId))
+                    .findFirst();
+            if (mission.isPresent()) {
+
+                EesMission missionToUpdate = mission.get();
+                List<EesCareerComment> comments = missionToUpdate.getComments() != null ? missionToUpdate.getComments() : new ArrayList<EesCareerComment>();
+                EesCareerComment newComment = EesCareerComment.builder()
+                        .text(comment)
+                        .createdAt(EesCommonUtil.generateCurrentDateUtil())
+                        .updatedAt(EesCommonUtil.generateCurrentDateUtil())
+                        .createdBy(user.get().getUserId())
+                        .build();
+                comments.add(newComment);
+                missionToUpdate.setComments(comments);
+                // First update the comment field
+                eesCareerCommentRepository.save(newComment);
+
+                // Then update the mission field
+                EesMission updatedMission = eesMissionRepository.save(missionToUpdate);
+
+                return ResponseEntity.ok(updatedMission);
+            } else {
+                return new ResponseEntity<>("Mission not found for the collaborator.", HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(new EesMessageResponse(String.format(EesUserResponse.EES_USER_NOT_FOUND)), HttpStatus.NOT_FOUND);
+        }
+    }
 }

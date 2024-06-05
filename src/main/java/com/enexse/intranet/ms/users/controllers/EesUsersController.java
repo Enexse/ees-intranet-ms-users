@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +34,13 @@ public class EesUsersController {
 
     private EesWorkplaceService eesWorkplaceService;
 
-    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR})
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PostMapping(EesUserEndpoints.EES_CREATE_USER)
-    public ResponseEntity<?> createUser(@RequestBody EesCreateUserRequest request, @RequestParam(value = "personalEmail", required = true) String personalEmail) throws Exception {
-        Response createdResponse = kcAdminClient.createKeycloakUser(request, personalEmail);
-        return ResponseEntity.status(createdResponse.getStatus()).build();
+    public ResponseEntity<Object> createUser(
+            @RequestBody EesCreateUserRequest request,
+            @RequestParam(value = "personalEmail", required = true) String personalEmail) throws Exception {
+        ResponseEntity<Object> createdResponse = kcAdminClient.createKeycloakUser(request, personalEmail);
+        return ResponseEntity.status(HttpStatus.OK).body(createdResponse.getBody());
     }
 
     @PostMapping(EesUserEndpoints.EES_LOGIN_USER)
@@ -67,8 +68,8 @@ public class EesUsersController {
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR})
     @PutMapping(EesUserEndpoints.EES_UPDATE_PROFIL_USER)
-    public ResponseEntity<Object> eesUpdateUserProfil(@PathVariable String userId, @RequestBody EesUpdateUserProfile request) {
-        return eesUserService.updateUserProfil(userId, request);
+    public ResponseEntity<Object> eesUpdateUserProfile(@PathVariable String userId, @RequestBody EesUpdateUserProfile request) {
+        return eesUserService.updateUserProfile(userId, request);
     }
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR})
@@ -77,13 +78,13 @@ public class EesUsersController {
         return eesUserService.certificateEmailUser(request);
     }
 
-    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR})
+    //@RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR}) -> Needs in web without connected
     @PostMapping(EesUserEndpoints.EES_SEND_CODE_TWO_FACTORY_AUTH)
     public ResponseEntity<Object> eesSendCode2FactoryUser(@RequestParam(value = "enexseEmail", required = true) String enexseEmail) {
         return eesUserService.sendCode2FactoryUser(enexseEmail);
     }
 
-    //@RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR})
+    //@RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR}) -> Needs in web without connected
     @PutMapping(EesUserEndpoints.EES_ACTIVATE_OR_DISABLED)
     public ResponseEntity<Object> eesActivateOrDisabledUser(@RequestParam(value = "userId", required = true) String userId,
                                                             @RequestParam(value = "link", required = true) String link) {
@@ -108,7 +109,7 @@ public class EesUsersController {
         return eesUserService.getUserByEnexseEmail(email);
     }
 
-    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_COLLABORATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
+    //@RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_COLLABORATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PutMapping(EesUserEndpoints.EES_UPDATE_PASSWORD)
     public ResponseEntity<Object> updatePassword(@PathVariable String userId, @RequestBody String newPassword, @RequestParam String idlink) {
         return eesUserService.updatePassword(userId, newPassword, idlink);
@@ -122,9 +123,8 @@ public class EesUsersController {
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_COLLABORATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PutMapping(EesUserEndpoints.EES_CHANGE_PASSWORD)
     public ResponseEntity<Object> eesChangePassword(@PathVariable String userId,
-                                                    @RequestParam String currentPassword,
-                                                    @RequestBody EesChangePasswordRequest request
-    ) throws Exception {
+                                                    @RequestParam(value = "currentPassword", required = true) String currentPassword,
+                                                    @RequestBody EesChangePasswordRequest request) {
         return eesUserService.changePassword(userId, currentPassword, request);
     }
 
@@ -208,17 +208,29 @@ public class EesUsersController {
     }
 
     @PostMapping(EesUserEndpoints.EES_VERIFY_CODE_AUTH)
-    public ResponseEntity<Object> eesVerificationCodeAuth(@RequestParam(value = "enexseEmail", required = true) String enexseEmail, @RequestParam(value = "code", required = true) String code) {
+    public ResponseEntity<Object> eesVerificationCodeAuth(
+            @RequestParam(value = "enexseEmail", required = true) String enexseEmail,
+            @RequestParam(value = "code", required = true) String code) {
         return eesUserService.verificationCodeAuth(enexseEmail, code);
     }
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PutMapping(EesUserEndpoints.EES_UPDATE_COLLABORATOR_INFO)
-    public ResponseEntity<Object> eesUpdateCollaboratorInfo(@PathVariable String userId, @RequestBody EesUpdateCollaboratorInfoRequest request) {
+    public ResponseEntity<Object> eesUpdateCollaboratorInfo(
+            @PathVariable String userId,
+            @RequestBody EesUpdateCollaboratorInfoRequest request) {
         return eesUserService.updateCollaboratorInfo(userId, request);
     }
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
+    @PutMapping(EesUserEndpoints.EES_UPDATE_COLLABORATOR_STATUS)
+    public ResponseEntity<Object> eesUpdateCollaboratorStatus(
+            @PathVariable String userId,
+            @RequestParam(value = "status", required = true) String status) {
+        return eesUserService.updateCollaboratorStatus(userId, status);
+    }
+
+    @RolesAllowed({ EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE, EesUserConstants.EES_ROLE_COLLABORATOR })
     @GetMapping(EesUserEndpoints.EES_GET_ENTITY)
     public ResponseEntity<Object> getEntity(@PathVariable String userId) {
         return eesUserService.getEntity(userId);
@@ -300,6 +312,17 @@ public class EesUsersController {
     }
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
+    @PutMapping(EesUserEndpoints.EES_ADD_COMMENT_MISSION_COLLABORATOR)
+    public ResponseEntity<Object> addCommentCareer(
+            @PathVariable("userId") String userId,
+            @RequestParam("careerId") String careerId,
+            @RequestParam("comment") String comment
+    ) {
+        ResponseEntity<Object> response = eesUserService.addCommentCareer(userId, careerId, comment);
+        return response;
+    }
+
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PutMapping(EesUserEndpoints.EES_UPDATE_FORMATION_COLLABORATOR)
     public ResponseEntity<Object> updateFormation(
             @PathVariable("userId") String userId,
@@ -339,4 +362,12 @@ public class EesUsersController {
         return workplace;
     }
 
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
+    @PostMapping(EesUserEndpoints.EES_RESEND_INVITATION_USER)
+    public ResponseEntity<Object> eesResendInvitationUser(
+            @RequestBody EesCreateUserRequest request,
+            @RequestParam(value = "personalEmail", required = true) String personalEmail) {
+        ResponseEntity<Object> response = eesUserService.resendInvitationUser(request, personalEmail);
+        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+    }
 }

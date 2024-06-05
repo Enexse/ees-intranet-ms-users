@@ -18,10 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -81,7 +82,8 @@ public class EesUserPermissionService {
     }
 
     public List<EesUserPermission> getAllPermissions() {
-        List<EesUserPermission> permissions = permissionRepository.findAll();
+        List<EesUserPermission> permissions = permissionRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesUserPermission::getCreatedAt).reversed()).collect(Collectors.toList());
         return permissions;
     }
 
@@ -120,7 +122,7 @@ public class EesUserPermissionService {
                     }
                 }
 
-                  // If the request to delete is found, remove it from both lists
+                // If the request to delete is found, remove it from both lists
                 if (requestToDelete != null) {
                     accessRequests.remove(requestToDelete);
                     rolePermissions.removeIf(rolePermission -> rolePermission.getPermissionCode().equals(permission.getPermissionCode()));
@@ -132,12 +134,9 @@ public class EesUserPermissionService {
                     // Save the updated Role entity
                     roleRepository.save(role);
                 }
-
-
-                // Delete the permission
-                permissionRepository.delete(permission);
-
             }
+            // Delete the permission
+            permissionRepository.delete(permission);
         }
         return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_PERMISSION_DELETED), HttpStatus.OK);
     }

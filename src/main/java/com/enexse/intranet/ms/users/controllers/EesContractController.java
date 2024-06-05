@@ -3,7 +3,6 @@ package com.enexse.intranet.ms.users.controllers;
 import com.enexse.intranet.ms.users.constants.EesUserConstants;
 import com.enexse.intranet.ms.users.constants.EesUserEndpoints;
 import com.enexse.intranet.ms.users.models.EesContract;
-import com.enexse.intranet.ms.users.models.EesCustomer;
 import com.enexse.intranet.ms.users.payload.request.EesContractRequest;
 import com.enexse.intranet.ms.users.services.EesContractService;
 import lombok.AllArgsConstructor;
@@ -28,7 +27,7 @@ public class EesContractController {
         return eesContractService.insertContract(request);
     }
 
-    @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
+    @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @GetMapping(EesUserEndpoints.EES_GET_All_CONTRACTS)
     public List<EesContract> eesGetAllContracts() {
         return eesContractService.getAllContracts();
@@ -50,7 +49,7 @@ public class EesContractController {
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @PutMapping(EesUserEndpoints.EES_ACTIVATE_DISABLED_CONTRACT_BY_CODE)
     public ResponseEntity<Object> eesChangeStatusContract(@PathVariable String contractCode,
-                                                            @RequestParam(value = "status", required = true) String status) {
+                                                          @RequestParam(value = "status", required = true) String status) {
         return eesContractService.changeStatusContract(contractCode, status);
     }
 

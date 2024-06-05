@@ -1,5 +1,6 @@
 package com.enexse.intranet.ms.users.models;
 
+import com.enexse.intranet.ms.users.models.partials.EesCareerComment;
 import com.enexse.intranet.ms.users.models.partials.EesGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.GeneratedValue;
-
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,4 +31,7 @@ public class EesMission {
     private String place;
     private String startDate;
     private String endDate;
+
+    @DBRef
+    private List<EesCareerComment> comments;
 }

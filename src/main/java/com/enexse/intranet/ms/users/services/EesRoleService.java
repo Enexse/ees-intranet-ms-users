@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EesRoleService {
@@ -91,9 +92,9 @@ public class EesRoleService {
 
     }
 
-
     public List<EesUserRole> getAllRoles() {
-        List<EesUserRole> roles = eesRoleRepository.findAll();
+        List<EesUserRole> roles = eesRoleRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesUserRole::getRoleCode).reversed()).collect(Collectors.toList());
         return roles;
     }
 
@@ -105,10 +106,8 @@ public class EesRoleService {
     }
 
     public EesUserRole getRoleByTitle(String roleTitle) {
-
         return eesRoleRepository.findByroleTitle(roleTitle);
     }
-
 
     public ResponseEntity<Object> updateRoleByCode(String roleCode, EesRoleRequest request) {
         String prefixRoleCode = EesUserResponse.EES_ROLE_PREFIX + roleCode;
@@ -197,7 +196,6 @@ public class EesRoleService {
                     }
                 }
             }
-
             eesRoleRepository.delete(role);
             return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_ROLE_DELETED), HttpStatus.OK);
         }

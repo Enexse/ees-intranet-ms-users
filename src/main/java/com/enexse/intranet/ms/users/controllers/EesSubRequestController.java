@@ -22,7 +22,6 @@ public class EesSubRequestController {
 
     private EesSubRequestService eesSubRequestService;
 
-
     @RolesAllowed(EesUserConstants.EES_ROLE_ADMINISTRATOR)
     @PostMapping(EesUserEndpoints.EES_INSERT_SUB_REQUEST)
     public ResponseEntity<Object> eesInsertRequest(@Valid @RequestBody EesSubRequest request) {

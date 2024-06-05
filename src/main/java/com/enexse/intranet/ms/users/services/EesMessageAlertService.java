@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -45,7 +47,8 @@ public class EesMessageAlertService {
     }
 
     public List<EesMessageAlert> getAlerts() {
-        return alertRepository.findAll();
+        return alertRepository.findAll()
+                .stream().sorted(Comparator.comparing(EesMessageAlert::getCreatedAt).reversed()).collect(Collectors.toList());
     }
 
     public ResponseEntity<Object> getAlertById(String id) {

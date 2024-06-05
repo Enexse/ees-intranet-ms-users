@@ -7,7 +7,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-0.eureka:8761/eureka #${EUREKA_SERVER_ADDRESS}
+      defaultZone: http://localhost:8761/eureka/ #${EUREKA_SERVER_ADDRESS}
     fetch-registry: true
     register-with-eureka: true
   instance:
@@ -29,4 +29,4 @@ cloudinary:
   api-key: 135195339797177
   secret-key: H6fAcSZs1RQgPPQDqgsAeJ8H6dk
 application:
-  url: https://groovy-pager-265618.uc.r.appspot.com/
+  url: http://groovy-pager-265618.uc.r.appspot.com/

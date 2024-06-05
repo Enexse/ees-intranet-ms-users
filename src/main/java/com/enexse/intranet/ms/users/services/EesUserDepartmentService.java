@@ -15,10 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -63,7 +61,9 @@ public class EesUserDepartmentService {
     }
 
     public List<EesUserDepartment> getAllDepartments() {
-        List<EesUserDepartment> departments = eesUserDepartmentRepository.findAll();
+        List<EesUserDepartment> departments = eesUserDepartmentRepository
+                .findAll()
+                .stream().sorted(Comparator.comparing(EesUserDepartment::getCreatedAt).reversed()).collect(Collectors.toList());
         return departments;
     }
 

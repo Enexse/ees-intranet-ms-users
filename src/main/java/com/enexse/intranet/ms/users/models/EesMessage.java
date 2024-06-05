@@ -22,7 +22,7 @@ public class EesMessage {
     private String email;
     private String[] defaultAvatar;
     private String phone;
-    private String country;
+    private String messageType;
     private String subject;
     private String message;
     private String createdAt;

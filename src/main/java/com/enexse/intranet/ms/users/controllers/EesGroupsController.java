@@ -62,7 +62,7 @@ public class EesGroupsController {
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
     @PostMapping(EesUserEndpoints.EES_SEND_MAIL_TO_GROUP)
     public ResponseEntity<Object> eesSendMailToGroup(@RequestPart("request") String requestJson,
-                                                     @RequestPart(value = "attachment", required = false) List<MultipartFile> attachments) {
+                                                     @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
         try {
             // Parse the JSON string into EesGroupEmailRequest object
             ObjectMapper objectMapper = new ObjectMapper();
@@ -76,9 +76,9 @@ public class EesGroupsController {
     }
 
     @RolesAllowed({EesUserConstants.EES_ROLE_ADMINISTRATOR, EesUserConstants.EES_ROLE_RESPONSABLE})
-    @PostMapping(EesUserEndpoints.EES_SEND_MAIL_TO_Collaborator)
+    @PostMapping(EesUserEndpoints.EES_SEND_MAIL_TO_COLLABORATOR)
     public ResponseEntity<Object> eesSendMailToCollaborator(@RequestPart("request") String requestJson,
-                                                            @RequestPart(value = "attachment", required = false) List<MultipartFile> attachments) {
+                                                            @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
         try {
             // Parse the JSON string into EesCollaboratorEmailRequest object
             ObjectMapper objectMapper = new ObjectMapper();

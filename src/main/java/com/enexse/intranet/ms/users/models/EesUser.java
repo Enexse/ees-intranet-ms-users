@@ -30,9 +30,12 @@ public class EesUser {
     private String userId;
 
     private String keycloakId;
+    private String responsible;
     private String firstName;
     private String lastName;
     private String pseudo;
+    private String nationality;
+    private String dateOfBirth;
 
     private String personalEmail;
     private String enexseEmail;

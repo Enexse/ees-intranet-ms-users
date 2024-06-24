@@ -48,7 +48,7 @@ public class EesUserEntityService {
             EesUserEntity entity = new EesUserEntity()
                     .builder()
                     .entityCode(request.getEntityCode().toUpperCase(Locale.ROOT))
-                    .entityDescription(request.getEntityDescription())
+                    .entityDescription(EesCommonUtil.generateCapitalize(request.getEntityDescription()))
                     .createdAt(EesCommonUtil.generateCurrentDateUtil())
                     .updatedAt(EesCommonUtil.generateCurrentDateUtil())
                     .createdBy(user.get())
@@ -102,8 +102,13 @@ public class EesUserEntityService {
                         return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_ENTITY_ALREADY_EXISTS, request.getEntityCode())), HttpStatus.BAD_REQUEST);
                     }
                 }
+                // Check the duplicate description before saving
+                EesUserEntity existingEntity = eesUserEntityRepository.findByEntityDescription(EesCommonUtil.generateCapitalize(request.getEntityDescription()));
+                if (existingEntity != null) {
+                    return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_ENTITY_ALREADY_EXISTS_DESCRIPTION, request.getEntityDescription())), HttpStatus.BAD_REQUEST);
+                }
                 entity.setEntityCode(request.getEntityCode());
-                entity.setEntityDescription(request.getEntityDescription());
+                entity.setEntityDescription(EesCommonUtil.generateCapitalize(request.getEntityDescription()));
                 entity.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
                 entity.setCreatedBy(user.get());
                 eesUserEntityRepository.save(entity);

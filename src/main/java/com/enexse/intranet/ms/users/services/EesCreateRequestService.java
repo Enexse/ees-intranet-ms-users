@@ -85,7 +85,8 @@ public class EesCreateRequestService {
         }
 
         // Upload files to Cloudinary
-        List<EesCloudinaryDoc> attachments = uploadFilesToCloudinary(files, user.get().getUserId());  //new ArrayList<EesCloudinaryDoc>();
+        //List<EesCloudinaryDoc> attachments = uploadFilesToCloudinary(files, user.get().getUserId());  //new ArrayList<EesCloudinaryDoc>();
+        List<EesCloudinaryDoc> attachments = new ArrayList<EesCloudinaryDoc>();
         if (files != null) {
             for (MultipartFile file : files) {
                 Map<String, String> options = new HashMap<String, String>();
@@ -128,7 +129,7 @@ public class EesCreateRequestService {
                 .request(userRequest)
                 .subRequest(userSubRequest.get())
                 .recipient(recipient.get())
-                .referent(referent.get())
+                .referent(referent.isEmpty() ? new EesUser() : referent.get())
                 .user(user.get())
                 .personalEmail(user.get().getPersonalEmail())
                 .type(EesUserConstants.EES_REQUEST_MANUAL.toUpperCase(Locale.ROOT))
@@ -138,22 +139,6 @@ public class EesCreateRequestService {
                 .status(EesStatusRequest.PENDING)
                 .attachments(eesCloudinaryDocs)
                 .build();
-
-        // Check if a file was uploaded
-//        if (files != null && !files.isEmpty()) {
-//            HashMap<String, String> fileIdsMap = new HashMap<>();
-//            for (MultipartFile file : files) {
-//                try {
-//                    String fileId = uploadFile(file);
-//                    fileIdsMap.put(fileId, file.getOriginalFilename());
-//                } catch (Exception e) {
-//                    // Handle file upload error
-//                    return new ResponseEntity<>(new EesMessageResponse("Error uploading the file."), HttpStatus.INTERNAL_SERVER_ERROR);
-//                }
-//            }
-//
-//            createRequest.setAttachmentFileIds(fileIdsMap);
-//        }
 
         eesCreateRequestRepository.save(createRequest);
         return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_CREATE_REQUEST_CREATED)), HttpStatus.OK);

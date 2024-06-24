@@ -12,4 +12,7 @@ public interface EesUserProfessionRepository  extends MongoRepository <EesUserPr
 
     @Query("{'professionCode' :?0}")
     EesUserProfession findByProfessionCode(String professionCode);
+
+    @Query("{'professionName' :?0}")
+    EesUserProfession findByProfessionName(String professionName);
 }

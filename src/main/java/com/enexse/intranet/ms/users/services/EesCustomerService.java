@@ -50,8 +50,8 @@ public class EesCustomerService {
         } else {
             EesReferentCustomer referent = new EesReferentCustomer()
                     .builder()
-                    .firstName(request.getReferent().getFirstName())
-                    .lastName(request.getReferent().getLastName())
+                    .firstName(EesCommonUtil.generateCapitalize(request.getReferent().getFirstName()))
+                    .lastName(EesCommonUtil.generateCapitalize(request.getReferent().getLastName()))
                     .profession(request.getReferent().getProfession())
                     .email(request.getReferent().getEmail())
                     .phoneNumbers(request.getReferent().getPhoneNumbers())
@@ -61,7 +61,7 @@ public class EesCustomerService {
             EesCustomer customer = new EesCustomer()
                     .builder()
                     .customerCode(request.getCustomerCode().toUpperCase(Locale.ROOT))
-                    .customerTitle(request.getCustomerTitle())
+                    .customerTitle(EesCommonUtil.generateCapitalize(request.getCustomerTitle()))
                     .sectorField(request.getSectorField())
                     .status(EesStatus.ACTIVE)
                     .comments(request.getComments())
@@ -123,14 +123,14 @@ public class EesCustomerService {
                 if (eesCustomerRepository.existsByCustomerCode(request.getCustomerCode()) && prefixCustomerCode.compareToIgnoreCase(request.getCustomerCode()) != 0) {
                     return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_CUSTOMER_ALREADY_EXISTS, request.getCustomerCode())), HttpStatus.BAD_REQUEST);
                 }
-                referentCustomer.setFirstName(request.getReferent().getFirstName());
-                referentCustomer.setLastName(request.getReferent().getLastName());
+                referentCustomer.setFirstName(EesCommonUtil.generateCapitalize(request.getReferent().getFirstName()));
+                referentCustomer.setLastName(EesCommonUtil.generateCapitalize(request.getReferent().getLastName()));
                 referentCustomer.setProfession(request.getReferent().getProfession());
                 referentCustomer.setEmail(request.getReferent().getEmail());
                 referentCustomer.setPhoneNumbers(request.getReferent().getPhoneNumbers());
                 eesReferentCustomerRepository.save(referentCustomer);
                 customer.setCustomerCode(request.getCustomerCode());
-                customer.setCustomerTitle(request.getCustomerTitle());
+                customer.setCustomerTitle(EesCommonUtil.generateCapitalize(request.getCustomerTitle()));
                 customer.setWebsite(request.getWebsite());
                 customer.setSectorField(request.getSectorField());
                 customer.setFax(request.getFax());

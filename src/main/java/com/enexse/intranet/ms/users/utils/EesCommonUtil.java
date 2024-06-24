@@ -33,6 +33,10 @@ public class EesCommonUtil {
         return RandomStringUtils.random(6, EesUserConstants.EES_RANDOM_NUMBERS);
     }
 
+    public static String generateCapitalize(String name) {
+        return name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1).toLowerCase(Locale.ROOT);
+    }
+
     public static String generateFirstPassword(String lastname) {
 
         String firstPassword = lastname.split(" ")[0].substring(0, 1).toUpperCase(Locale.ROOT)
@@ -46,7 +50,7 @@ public class EesCommonUtil {
         return EesUserConstants.EES_DEFAULT_AVATAR[rnd];
     }
 
-    public static String generateDefaultDepartmentColor(){
+    public static String generateDefaultDepartmentColor() {
         int rnd = new Random().nextInt(EesUserConstants.EES_DEFAULT_DEPARTMENT_COLOR.length);
         return EesUserConstants.EES_DEFAULT_DEPARTMENT_COLOR[rnd];
     }

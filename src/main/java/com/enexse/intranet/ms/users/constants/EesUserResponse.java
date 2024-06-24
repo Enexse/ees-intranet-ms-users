@@ -83,6 +83,7 @@ public class EesUserResponse {
     // ENTITIES
     public static final String EES_ENTITY_CREATED = "Entity created successfully.";
     public static final String EES_ENTITY_ALREADY_EXISTS = "Entity already exists with code %s. Try another one.";
+    public static final String EES_ENTITY_ALREADY_EXISTS_DESCRIPTION = "Entity already exists with description %s. Try another one.";
     public static final String EES_ENTITY_PREFIX = "EES-ENTITY-";
     public static final String EES_ENTITY_INVALID_LENGTH = "Entity code must be EES-ENTITY-XXX";
     public static final String EES_ENTITY_NOT_FOUND = "Entity not found with code ";
@@ -92,6 +93,7 @@ public class EesUserResponse {
     // DEPARTMENTS
     public static final String EES_DEPARTMENT_CREATED = "Department created successfully.";
     public static final String EES_DEPARTMENT_ALREADY_EXISTS = "Department already exists with code %s. Try another one.";
+    public static final String EES_DEPARTMENT_ALREADY_EXISTS_DESCRIPTION = "Department already exists with description %s. Try another one.";
     public static final String EES_DEPARTMENT_PREFIX = "EES-DEPARTMENT-";
     public static final String EES_DEPARTMENT_INVALID_LENGTH = "DepartmentCode must be EES-DEPARTMENT-XXX";
     public static final String EES_DEPARTMENT_NOT_FOUND = "Department Not Found with ";
@@ -113,6 +115,7 @@ public class EesUserResponse {
     public static final String EES_PROFESSION_CODE_COULD_NOT_BE_NULL = "Profession code could not be null";
     public static final String EES_PROFESSION_CODE_INVALID_FORMAT = "Profession code must starts with EES-PROFESSION-";
     public static final String EES_PROFESSION_ALREADY_EXISTS = "Profession already exists with code %s. Try another one ";
+    public static final String EES_PROFESSION_ALREADY_EXISTS_DESCRIPTION = "Profession already exists with description %s. Try another one ";
     public static final String EES_PROFESSION_CREATED = "Profession created Successfully";
     public static final String EES_PROFESSION_UPDATED = "Profession updated successfully.";
     public static final String EES_PROFESSION_NOT_FOUND = "Profession not found";

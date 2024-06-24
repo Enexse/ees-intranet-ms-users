@@ -3,6 +3,7 @@ package com.enexse.intranet.ms.users.services;
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.models.EesUserDepartment;
+import com.enexse.intranet.ms.users.models.EesUserEntity;
 import com.enexse.intranet.ms.users.models.EesUserProfession;
 import com.enexse.intranet.ms.users.payload.request.EesDepartmentRequest;
 import com.enexse.intranet.ms.users.payload.response.EesMessageResponse;
@@ -48,7 +49,7 @@ public class EesUserDepartmentService {
             EesUserDepartment department = new EesUserDepartment()
                     .builder()
                     .departmentCode(request.getDepartmentCode().toUpperCase(Locale.ROOT))
-                    .departmentDescription(request.getDepartmentDescription())
+                    .departmentDescription(EesCommonUtil.generateCapitalize(request.getDepartmentDescription()))
                     .professions(professions)
                     .createdAt(EesCommonUtil.generateCurrentDateUtil())
                     .updatedAt(EesCommonUtil.generateCurrentDateUtil())
@@ -105,8 +106,14 @@ public class EesUserDepartmentService {
                         return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_DEPARTMENT_ALREADY_EXISTS, request.getDepartmentCode())), HttpStatus.BAD_REQUEST);
                     }
                 }
+
+                // Check the duplicate description before saving
+                EesUserDepartment existingDepartment = eesUserDepartmentRepository.findByDepartmentDescription(EesCommonUtil.generateCapitalize(request.getDepartmentDescription()));
+                if (existingDepartment != null) {
+                    return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_DEPARTMENT_ALREADY_EXISTS_DESCRIPTION, request.getDepartmentDescription())), HttpStatus.BAD_REQUEST);
+                }
                 department.setDepartmentCode(request.getDepartmentCode());
-                department.setDepartmentDescription(request.getDepartmentDescription());
+                department.setDepartmentDescription(EesCommonUtil.generateCapitalize(request.getDepartmentDescription()));
                 department.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
                 department.setCreatedBy(user.get());
                 eesUserDepartmentRepository.save(department);

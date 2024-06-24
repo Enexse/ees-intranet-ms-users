@@ -1,9 +1,9 @@
 package com.enexse.intranet.ms.users.services;
 
 import com.enexse.intranet.ms.users.constants.EesUserResponse;
-import com.enexse.intranet.ms.users.models.EesMessageAlert;
 import com.enexse.intranet.ms.users.models.EesUser;
 import com.enexse.intranet.ms.users.models.EesUserDepartment;
+import com.enexse.intranet.ms.users.models.EesUserEntity;
 import com.enexse.intranet.ms.users.models.EesUserProfession;
 import com.enexse.intranet.ms.users.payload.request.EesProfessionRequest;
 import com.enexse.intranet.ms.users.payload.response.EesMessageResponse;
@@ -54,7 +54,7 @@ public class EesProfessionService {
 
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_PROFESSION_ALREADY_EXISTS, professionRequest.getProfessionCode())), HttpStatus.BAD_REQUEST);
         }
-        //Check if departement exists
+        // Check if department exists
         EesUserDepartment userDepartment = departmentRepository.findByCompanyDepartmentCode(professionRequest.getDepartmentCode());
         if (userDepartment == null) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_DEPARTMENT_NOT_FOUND, professionRequest.getDepartmentCode())), HttpStatus.BAD_REQUEST);
@@ -63,7 +63,7 @@ public class EesProfessionService {
         EesUserProfession userProfession = EesUserProfession
                 .builder()
                 .professionCode(professionRequest.getProfessionCode())
-                .professionName(professionRequest.getProfessionName())
+                .professionName(EesCommonUtil.generateCapitalize(professionRequest.getProfessionName()))
                 .departmentCode(userDepartment.getDepartmentCode())
                 .departmentDescription(userDepartment.getDepartmentDescription())
                 .createdAt(EesCommonUtil.generateCurrentDateUtil())
@@ -74,7 +74,6 @@ public class EesProfessionService {
         userDepartment.getProfessions().add(userProfession.getProfessionCode());
         departmentRepository.save(userDepartment);
         return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_PROFESSION_CREATED), HttpStatus.CREATED);
-
     }
 
 
@@ -119,21 +118,26 @@ public class EesProfessionService {
             }
         }
 
-        // Check if departement exists
+        // Check if department exists
         EesUserDepartment userDepartment = departmentRepository.findByCompanyDepartmentCode(professionRequest.getDepartmentCode());
         if (userDepartment == null) {
             return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_DEPARTMENT_NOT_FOUND, professionRequest.getDepartmentCode())), HttpStatus.BAD_REQUEST);
         }
 
+        // Check the duplicate description before saving
+        EesUserProfession existingProfession = professionRepository.findByProfessionName(EesCommonUtil.generateCapitalize(professionRequest.getProfessionName()));
+        if (existingProfession != null) {
+            return new ResponseEntity<Object>(new EesMessageResponse(String.format(EesUserResponse.EES_PROFESSION_ALREADY_EXISTS_DESCRIPTION, professionRequest.getProfessionName())), HttpStatus.BAD_REQUEST);
+        }
+
         profession.setProfessionCode(professionRequest.getProfessionCode());
-        profession.setProfessionName(professionRequest.getProfessionName());
+        profession.setProfessionName(EesCommonUtil.generateCapitalize(professionRequest.getProfessionName()));
         profession.setDepartmentCode(userDepartment.getDepartmentCode());
         profession.setDepartmentDescription(userDepartment.getDepartmentDescription());
         profession.setCreatedBy(user.get());
         profession.setUpdatedAt(EesCommonUtil.generateCurrentDateUtil());
         professionRepository.save(profession);
         userDepartment.getProfessions().add(profession.getProfessionCode());
-        System.out.println("***" + userDepartment.getProfessions());
         departmentRepository.save(userDepartment);
 
         return new ResponseEntity<Object>(new EesMessageResponse(EesUserResponse.EES_PROFESSION_UPDATED), HttpStatus.OK);
